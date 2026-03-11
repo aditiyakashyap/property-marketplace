@@ -1,6 +1,5 @@
 // File: app.js
-// Replace this with your deployed Google Apps Script Web App URL
-const API_URL = 'YOUR_GOOGLE_APPS_SCRIPT_WEB_APP_URL_HERE'; 
+const API_URL = 'https://script.google.com/macros/s/AKfycbwtS0z1w7hBaZ5Tnz7vYIB0fqSCUOSsRen215sddHnstN2w4zAhOnJNyIiHV895H_I/exec'; 
 
 class App {
     constructor() {
@@ -63,7 +62,6 @@ class App {
         container.innerHTML = `<div class="col-span-full flex justify-center py-12"><div class="loader w-12 h-12 border-4 border-t-blue-600"></div></div>`;
 
         try {
-            // Using redirect: 'follow' for Google Apps Script execution
             const response = await fetch(API_URL, { method: 'GET', redirect: 'follow' });
             const result = await response.json();
             
@@ -138,7 +136,6 @@ class App {
         this.renderListingsGrid('buyer', filtered);
     }
 
-    /* Modal Management */
     openModal(htmlContent) {
         const backdrop = document.getElementById('modal-backdrop');
         const content = document.getElementById('modal-content');
@@ -146,7 +143,6 @@ class App {
         content.innerHTML = htmlContent;
         backdrop.classList.remove('hidden');
         
-        // Trigger animations
         setTimeout(() => {
             backdrop.classList.remove('opacity-0');
             content.classList.remove('scale-95');
@@ -166,7 +162,6 @@ class App {
         }, 300);
     }
 
-    /* Auth Modals & Logic */
     showAuthModal(type = 'login') {
         const isLogin = type === 'login';
         const html = `
@@ -268,7 +263,6 @@ class App {
         this.showToast('Logged out successfully', 'success');
     }
 
-    /* Listing Management */
     showAddListingModal() {
         const html = `
             <div class="p-8 max-h-[90vh] overflow-y-auto">
@@ -346,7 +340,7 @@ class App {
             if (data.success) {
                 this.closeModal();
                 this.showToast('Property listed successfully!', 'success');
-                this.fetchAndRenderListings('seller'); // Refresh grid
+                this.fetchAndRenderListings('seller');
             } else {
                 this.showToast('Failed to add listing', 'error');
                 btn.innerHTML = originalText;
@@ -360,7 +354,6 @@ class App {
         }
     }
 
-    /* Interest Logic */
     showInterestModal(listingId) {
         const listing = this.listings.find(l => l.id === listingId);
         
@@ -435,7 +428,6 @@ class App {
         }
     }
 
-    /* UI Utilities */
     showToast(message, type = 'success') {
         const container = document.getElementById('toast-container');
         const toast = document.createElement('div');
@@ -460,5 +452,4 @@ class App {
     }
 }
 
-// Initialize App
 const app = new App();
