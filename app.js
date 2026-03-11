@@ -1,4 +1,23 @@
-// app.js
+// File: app.js
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+import { getFirestore, doc, setDoc, getDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+
+const firebaseConfig = {
+  apiKey: "AIzaSyBAsZ-4RsrD7mO78MlYk0hMQMmm124R_yM",
+  authDomain: "ppty-77cb7.firebaseapp.com",
+  projectId: "ppty-77cb7",
+  storageBucket: "ppty-77cb7.firebasestorage.app",
+  messagingSenderId: "286646841994",
+  appId: "1:286646841994:web:d5432d9edf53e55fbf3373",
+  measurementId: "G-M9MV23TEWQ"
+};
+
+// Initialize Firebase
+const firebaseApp = initializeApp(firebaseConfig);
+const auth = getAuth(firebaseApp);
+const db = getFirestore(firebaseApp);
+
 const API_URL = 'https://script.google.com/macros/s/AKfycbwtS0z1w7hBaZ5Tnz7vYIB0fqSCUOSsRen215sddHnstN2w4zAhOnJNyIiHV895H_I/exec'; 
 
 class App {
@@ -41,21 +60,103 @@ class App {
         const main = document.getElementById('main-content');
         
         if (view === 'home') {
-            const tpl = document.getElementById('tpl-home');
-            main.innerHTML = tpl.innerHTML;
+            main.innerHTML = document.getElementById('tpl-home').innerHTML;
         } 
         else if (view === 'dashboard-seller') {
-            const tpl = document.getElementById('tpl-dashboard-seller');
-            main.innerHTML = tpl.innerHTML;
+            main.innerHTML = document.getElementById('tpl-dashboard-seller').innerHTML;
             this.fetchAndRenderListings('seller');
         } 
         else if (view === 'dashboard-buyer') {
-            const tpl = document.getElementById('tpl-dashboard-buyer');
-            main.innerHTML = tpl.innerHTML;
+            main.innerHTML = document.getElementById('tpl-dashboard-buyer').innerHTML;
             this.fetchAndRenderListings('buyer');
         }
     }
 
+    /* FIREBASE AUTHENTICATION LOGIC */
+    async handleAuth(action) {
+        const btn = document.getElementById('auth-submit-btn');
+        const originalText = btn.innerHTML;
+        btn.innerHTML = `<div class="loader w-5 h-5 border-2 border-t-white"></div>`;
+        btn.disabled = true;
+
+        const email = document.getElementById('auth-email').value;
+        const password = document.getElementById('auth-password').value;
+        
+        try {
+            if (action === 'register') {
+                const role = document.getElementById('auth-role').value;
+                const name = document.getElementById('auth-name').value;
+                
+                // 1. Create user in Firebase Auth
+                const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+                const user = userCredential.user;
+
+                // 2. Save extended profile (role, name) to Firestore Database
+                await setDoc(doc(db, "users", user.uid), {
+                    name: name,
+                    role: role,
+                    email: email,
+                    createdAt: new Date().toISOString()
+                });
+
+                this.user = { userId: user.uid, role, name, email };
+
+            } else if (action === 'login') {
+                // 1. Sign in with Firebase Auth
+                const userCredential = await signInWithEmailAndPassword(auth, email, password);
+                const user = userCredential.user;
+
+                // 2. Fetch user profile from Firestore to get their role and name
+                const docSnap = await getDoc(doc(db, "users", user.uid));
+                
+                if (docSnap.exists()) {
+                    const userData = docSnap.data();
+                    this.user = { 
+                        userId: user.uid, 
+                        role: userData.role, 
+                        name: userData.name, 
+                        email: user.email 
+                    };
+                } else {
+                    throw new Error("User profile not found in database.");
+                }
+            }
+
+            // Save to local storage to maintain session
+            localStorage.setItem('propMatchUser', JSON.stringify(this.user));
+            this.closeModal();
+            this.renderNav();
+            this.navigate(`dashboard-${this.user.role}`);
+            this.showToast(`Welcome, ${this.user.name}!`, 'success');
+
+        } catch (err) {
+            console.error(err);
+            // Translate common firebase errors
+            let msg = "Authentication failed";
+            if (err.code === 'auth/email-already-in-use') msg = "Email already in use!";
+            if (err.code === 'auth/invalid-credential') msg = "Invalid email or password";
+            if (err.code === 'auth/weak-password') msg = "Password should be at least 6 characters";
+            
+            this.showToast(msg, 'error');
+            btn.innerHTML = originalText;
+            btn.disabled = false;
+        }
+    }
+
+    async logout() {
+        try {
+            await signOut(auth);
+            this.user = null;
+            localStorage.removeItem('propMatchUser');
+            this.renderNav();
+            this.navigate('home');
+            this.showToast('Logged out successfully', 'success');
+        } catch (error) {
+            this.showToast('Error logging out', 'error');
+        }
+    }
+
+    /* GOOGLE SHEETS LISTING LOGIC */
     async fetchAndRenderListings(context) {
         const containerId = context === 'seller' ? 'seller-listings-container' : 'buyer-listings-container';
         const container = document.getElementById(containerId);
@@ -70,12 +171,9 @@ class App {
                 this.renderListingsGrid(context);
             } else {
                 this.showToast('Failed to load listings', 'error');
-                container.innerHTML = `<p class="text-red-500 col-span-full text-center">Failed to load data.</p>`;
             }
         } catch (error) {
-            console.error(error);
             this.showToast('Network error while fetching listings', 'error');
-            container.innerHTML = `<p class="text-red-500 col-span-full text-center">Network error. Check console.</p>`;
         }
     }
 
@@ -107,12 +205,9 @@ class App {
                     </div>
                 </div>
                 <div class="p-5 flex-grow flex flex-col">
-                    <div class="flex justify-between items-start mb-2">
-                        <h3 class="text-xl font-bold text-gray-900 leading-tight">${listing.title}</h3>
-                    </div>
+                    <h3 class="text-xl font-bold text-gray-900 leading-tight mb-2">${listing.title}</h3>
                     <p class="text-blue-600 font-bold text-lg mb-3">₹${Number(listing.price).toLocaleString('en-IN')}</p>
                     <p class="text-gray-500 text-sm mb-4 line-clamp-2">${listing.description}</p>
-                    
                     <div class="mt-auto pt-4 border-t border-gray-100 flex items-center justify-between">
                         <div class="flex items-center text-sm text-gray-500">
                             <i class="fa-solid fa-location-dot mr-2 text-gray-400"></i> ${listing.location}
@@ -136,32 +231,90 @@ class App {
         this.renderListingsGrid('buyer', filtered);
     }
 
-    openModal(htmlContent) {
-        const backdrop = document.getElementById('modal-backdrop');
-        const content = document.getElementById('modal-content');
-        
-        content.innerHTML = htmlContent;
-        backdrop.classList.remove('hidden');
-        
-        setTimeout(() => {
-            backdrop.classList.remove('opacity-0');
-            content.classList.remove('scale-95');
-        }, 10);
+    async submitListing() {
+        const btn = document.getElementById('submit-listing-btn');
+        const originalText = btn.innerHTML;
+        btn.innerHTML = `<div class="loader w-5 h-5 border-2 border-t-white"></div>`;
+        btn.disabled = true;
+
+        const payload = {
+            action: 'addListing',
+            sellerId: this.user.userId,
+            sellerName: this.user.name,
+            title: document.getElementById('list-title').value,
+            type: document.getElementById('list-type').value,
+            price: document.getElementById('list-price').value,
+            location: document.getElementById('list-location').value,
+            description: document.getElementById('list-desc').value,
+            imageUrl: document.getElementById('list-image').value
+        };
+
+        try {
+            const res = await fetch(API_URL, {
+                method: 'POST',
+                headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+                body: JSON.stringify(payload),
+                redirect: 'follow'
+            });
+            const data = await res.json();
+
+            if (data.success) {
+                this.closeModal();
+                this.showToast('Property listed successfully!', 'success');
+                this.fetchAndRenderListings('seller');
+            } else {
+                this.showToast('Failed to add listing', 'error');
+                btn.innerHTML = originalText;
+                btn.disabled = false;
+            }
+        } catch (err) {
+            this.showToast('Error connecting to server', 'error');
+            btn.innerHTML = originalText;
+            btn.disabled = false;
+        }
     }
 
-    closeModal() {
-        const backdrop = document.getElementById('modal-backdrop');
-        const content = document.getElementById('modal-content');
-        
-        backdrop.classList.add('opacity-0');
-        content.classList.add('scale-95');
-        
-        setTimeout(() => {
-            backdrop.classList.add('hidden');
-            content.innerHTML = '';
-        }, 300);
+    async submitInterest(listingId) {
+        const btn = document.getElementById('submit-interest-btn');
+        const originalText = btn.innerHTML;
+        btn.innerHTML = `<div class="loader w-5 h-5 border-2 border-t-white"></div>`;
+        btn.disabled = true;
+
+        const payload = {
+            action: 'showInterest',
+            listingId: listingId,
+            buyerId: this.user.userId,
+            buyerName: this.user.name,
+            buyerEmail: this.user.email,
+            buyerPhone: document.getElementById('int-phone').value,
+            query: document.getElementById('int-query').value
+        };
+
+        try {
+            const res = await fetch(API_URL, {
+                method: 'POST',
+                headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+                body: JSON.stringify(payload),
+                redirect: 'follow'
+            });
+            const data = await res.json();
+
+            if (data.success) {
+                this.closeModal();
+                this.showToast('Your interest has been recorded!', 'success');
+            } else {
+                this.showToast('Failed to send interest', 'error');
+                btn.innerHTML = originalText;
+                btn.disabled = false;
+            }
+        } catch (err) {
+            this.showToast('Error connecting to server', 'error');
+            btn.innerHTML = originalText;
+            btn.disabled = false;
+        }
     }
 
+    /* MODAL UI UTILITIES (Unchanged) */
     showAuthModal(type = 'login') {
         const isLogin = type === 'login';
         const html = `
@@ -197,72 +350,10 @@ class App {
                     </button>
                 </form>
                 <div class="mt-6 text-center text-sm text-gray-500">
-                    ${isLogin 
-                        ? `Don't have an account? <a href="#" onclick="app.showAuthModal('register')" class="text-blue-600 font-medium">Sign up</a>` 
-                        : `Already have an account? <a href="#" onclick="app.showAuthModal('login')" class="text-blue-600 font-medium">Log in</a>`}
+                    ${isLogin ? `Don't have an account? <a href="#" onclick="app.showAuthModal('register')" class="text-blue-600 font-medium">Sign up</a>` : `Already have an account? <a href="#" onclick="app.showAuthModal('login')" class="text-blue-600 font-medium">Log in</a>`}
                 </div>
-            </div>
-        `;
+            </div>`;
         this.openModal(html);
-    }
-
-    async handleAuth(action) {
-        const btn = document.getElementById('auth-submit-btn');
-        const originalText = btn.innerHTML;
-        btn.innerHTML = `<div class="loader w-5 h-5 border-2 border-t-white"></div>`;
-        btn.disabled = true;
-
-        const email = document.getElementById('auth-email').value;
-        const password = document.getElementById('auth-password').value;
-        
-        let payload = { action, email, password };
-        
-        if (action === 'register') {
-            payload.role = document.getElementById('auth-role').value;
-            payload.name = document.getElementById('auth-name').value;
-        }
-
-        try {
-            const res = await fetch(API_URL, {
-                method: 'POST',
-                // Added text/plain Content-Type to fix Google Apps Script CORS block
-                headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-                body: JSON.stringify(payload),
-                redirect: 'follow'
-            });
-            const data = await res.json();
-
-            if (data.success) {
-                this.user = {
-                    userId: data.userId,
-                    role: data.role,
-                    name: data.name,
-                    email: email
-                };
-                localStorage.setItem('propMatchUser', JSON.stringify(this.user));
-                this.closeModal();
-                this.renderNav();
-                this.navigate(`dashboard-${this.user.role}`);
-                this.showToast(`Welcome, ${data.name}!`, 'success');
-            } else {
-                this.showToast(data.message || 'Authentication failed', 'error');
-                btn.innerHTML = originalText;
-                btn.disabled = false;
-            }
-        } catch (err) {
-            console.error(err);
-            this.showToast('Server connection error', 'error');
-            btn.innerHTML = originalText;
-            btn.disabled = false;
-        }
-    }
-
-    logout() {
-        this.user = null;
-        localStorage.removeItem('propMatchUser');
-        this.renderNav();
-        this.navigate('home');
-        this.showToast('Logged out successfully', 'success');
     }
 
     showAddListingModal() {
@@ -275,7 +366,7 @@ class App {
                 <form id="add-listing-form" onsubmit="event.preventDefault(); app.submitListing();" class="space-y-4">
                     <div>
                         <label class="block text-sm font-medium text-gray-700 mb-1">Property Title</label>
-                        <input type="text" id="list-title" required class="w-full border border-gray-300 rounded-lg p-3 outline-none focus:ring-2 focus:ring-blue-500" placeholder="e.g. Luxury Villa in South Delhi">
+                        <input type="text" id="list-title" required class="w-full border border-gray-300 rounded-lg p-3 outline-none focus:ring-2 focus:ring-blue-500">
                     </div>
                     <div class="grid grid-cols-2 gap-4">
                         <div>
@@ -289,173 +380,88 @@ class App {
                         </div>
                         <div>
                             <label class="block text-sm font-medium text-gray-700 mb-1">Price (₹)</label>
-                            <input type="number" id="list-price" required class="w-full border border-gray-300 rounded-lg p-3 outline-none focus:ring-2 focus:ring-blue-500" placeholder="e.g. 15000000">
+                            <input type="number" id="list-price" required class="w-full border border-gray-300 rounded-lg p-3 outline-none focus:ring-2 focus:ring-blue-500">
                         </div>
                     </div>
                     <div>
                         <label class="block text-sm font-medium text-gray-700 mb-1">Location</label>
-                        <input type="text" id="list-location" required class="w-full border border-gray-300 rounded-lg p-3 outline-none focus:ring-2 focus:ring-blue-500" placeholder="City, Area">
+                        <input type="text" id="list-location" required class="w-full border border-gray-300 rounded-lg p-3 outline-none focus:ring-2 focus:ring-blue-500">
                     </div>
                     <div>
                         <label class="block text-sm font-medium text-gray-700 mb-1">Description</label>
-                        <textarea id="list-desc" required rows="3" class="w-full border border-gray-300 rounded-lg p-3 outline-none focus:ring-2 focus:ring-blue-500" placeholder="Key features, amenities, etc."></textarea>
+                        <textarea id="list-desc" required rows="3" class="w-full border border-gray-300 rounded-lg p-3 outline-none focus:ring-2 focus:ring-blue-500"></textarea>
                     </div>
                     <div>
                         <label class="block text-sm font-medium text-gray-700 mb-1">Image URL (Optional)</label>
-                        <input type="url" id="list-image" class="w-full border border-gray-300 rounded-lg p-3 outline-none focus:ring-2 focus:ring-blue-500" placeholder="https://...">
+                        <input type="url" id="list-image" class="w-full border border-gray-300 rounded-lg p-3 outline-none focus:ring-2 focus:ring-blue-500">
                     </div>
                     <button type="submit" id="submit-listing-btn" class="w-full bg-blue-600 text-white rounded-lg p-3 font-medium hover:bg-blue-700 transition-colors mt-6 flex justify-center items-center">
                         Publish Listing
                     </button>
                 </form>
-            </div>
-        `;
+            </div>`;
         this.openModal(html);
-    }
-
-    async submitListing() {
-        const btn = document.getElementById('submit-listing-btn');
-        const originalText = btn.innerHTML;
-        btn.innerHTML = `<div class="loader w-5 h-5 border-2 border-t-white"></div>`;
-        btn.disabled = true;
-
-        const payload = {
-            action: 'addListing',
-            sellerId: this.user.userId,
-            sellerName: this.user.name,
-            title: document.getElementById('list-title').value,
-            type: document.getElementById('list-type').value,
-            price: document.getElementById('list-price').value,
-            location: document.getElementById('list-location').value,
-            description: document.getElementById('list-desc').value,
-            imageUrl: document.getElementById('list-image').value
-        };
-
-        try {
-            const res = await fetch(API_URL, {
-                method: 'POST',
-                // Added text/plain Content-Type to fix Google Apps Script CORS block
-                headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-                body: JSON.stringify(payload),
-                redirect: 'follow'
-            });
-            const data = await res.json();
-
-            if (data.success) {
-                this.closeModal();
-                this.showToast('Property listed successfully!', 'success');
-                this.fetchAndRenderListings('seller');
-            } else {
-                this.showToast('Failed to add listing', 'error');
-                btn.innerHTML = originalText;
-                btn.disabled = false;
-            }
-        } catch (err) {
-            console.error(err);
-            this.showToast('Error connecting to server', 'error');
-            btn.innerHTML = originalText;
-            btn.disabled = false;
-        }
     }
 
     showInterestModal(listingId) {
         const listing = this.listings.find(l => l.id === listingId);
-        
         const html = `
             <div class="p-8">
                 <div class="flex justify-between items-center mb-6">
                     <h3 class="text-2xl font-bold text-gray-900">Express Interest</h3>
                     <button onclick="app.closeModal()" class="text-gray-400 hover:text-gray-600"><i class="fa-solid fa-xmark text-xl"></i></button>
                 </div>
-                
                 <div class="bg-gray-50 p-4 rounded-lg mb-6 border border-gray-200">
-                    <p class="text-sm text-gray-500 uppercase tracking-wide font-semibold mb-1">Property</p>
                     <p class="font-bold text-gray-900">${listing.title}</p>
                     <p class="text-sm text-gray-600 mt-1">Seller: ${listing.sellerName}</p>
                 </div>
-
                 <form id="interest-form" onsubmit="event.preventDefault(); app.submitInterest('${listingId}');" class="space-y-4">
                     <div>
                         <label class="block text-sm font-medium text-gray-700 mb-1">Your Phone Number</label>
-                        <input type="tel" id="int-phone" required class="w-full border border-gray-300 rounded-lg p-3 outline-none focus:ring-2 focus:ring-blue-500" placeholder="+91 XXXXX XXXXX">
+                        <input type="tel" id="int-phone" required class="w-full border border-gray-300 rounded-lg p-3 outline-none focus:ring-2 focus:ring-blue-500">
                     </div>
                     <div>
                         <label class="block text-sm font-medium text-gray-700 mb-1">Message / Query</label>
-                        <textarea id="int-query" required rows="4" class="w-full border border-gray-300 rounded-lg p-3 outline-none focus:ring-2 focus:ring-blue-500" placeholder="I'd like to schedule a visit..."></textarea>
+                        <textarea id="int-query" required rows="4" class="w-full border border-gray-300 rounded-lg p-3 outline-none focus:ring-2 focus:ring-blue-500"></textarea>
                     </div>
                     <button type="submit" id="submit-interest-btn" class="w-full bg-gray-900 text-white rounded-lg p-3 font-medium hover:bg-black transition-colors mt-6 flex justify-center items-center">
                         Send to Seller
                     </button>
                 </form>
-            </div>
-        `;
+            </div>`;
         this.openModal(html);
     }
 
-    async submitInterest(listingId) {
-        const btn = document.getElementById('submit-interest-btn');
-        const originalText = btn.innerHTML;
-        btn.innerHTML = `<div class="loader w-5 h-5 border-2 border-t-white"></div>`;
-        btn.disabled = true;
+    openModal(htmlContent) {
+        const backdrop = document.getElementById('modal-backdrop');
+        const content = document.getElementById('modal-content');
+        content.innerHTML = htmlContent;
+        backdrop.classList.remove('hidden');
+        setTimeout(() => { backdrop.classList.remove('opacity-0'); content.classList.remove('scale-95'); }, 10);
+    }
 
-        const payload = {
-            action: 'showInterest',
-            listingId: listingId,
-            buyerId: this.user.userId,
-            buyerName: this.user.name,
-            buyerEmail: this.user.email,
-            buyerPhone: document.getElementById('int-phone').value,
-            query: document.getElementById('int-query').value
-        };
-
-        try {
-            const res = await fetch(API_URL, {
-                method: 'POST',
-                // Added text/plain Content-Type to fix Google Apps Script CORS block
-                headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-                body: JSON.stringify(payload),
-                redirect: 'follow'
-            });
-            const data = await res.json();
-
-            if (data.success) {
-                this.closeModal();
-                this.showToast('Your interest has been recorded! The seller will contact you.', 'success');
-            } else {
-                this.showToast('Failed to send interest', 'error');
-                btn.innerHTML = originalText;
-                btn.disabled = false;
-            }
-        } catch (err) {
-            console.error(err);
-            this.showToast('Error connecting to server', 'error');
-            btn.innerHTML = originalText;
-            btn.disabled = false;
-        }
+    closeModal() {
+        const backdrop = document.getElementById('modal-backdrop');
+        const content = document.getElementById('modal-content');
+        backdrop.classList.add('opacity-0');
+        content.classList.add('scale-95');
+        setTimeout(() => { backdrop.classList.add('hidden'); content.innerHTML = ''; }, 300);
     }
 
     showToast(message, type = 'success') {
         const container = document.getElementById('toast-container');
         const toast = document.createElement('div');
-        
         const colors = type === 'success' ? 'bg-green-600' : 'bg-red-600';
         const icon = type === 'success' ? 'fa-check-circle' : 'fa-circle-exclamation';
-
         toast.className = `toast-enter flex items-center gap-3 ${colors} text-white px-6 py-3 rounded-lg shadow-lg`;
-        toast.innerHTML = `
-            <i class="fa-solid ${icon} text-lg"></i>
-            <span class="font-medium">${message}</span>
-        `;
-        
+        toast.innerHTML = `<i class="fa-solid ${icon} text-lg"></i><span class="font-medium">${message}</span>`;
         container.appendChild(toast);
-        
         setTimeout(() => {
-            toast.style.opacity = '0';
-            toast.style.transform = 'translateX(100%)';
-            toast.style.transition = 'all 0.3s ease';
+            toast.style.opacity = '0'; toast.style.transform = 'translateX(100%)';
             setTimeout(() => toast.remove(), 300);
         }, 3000);
     }
 }
 
-const app = new App();
+// Attach to window so HTML inline onclick handlers can find it
+window.app = new App();
