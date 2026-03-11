@@ -1,22 +1,21 @@
-// File: app.js
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut, GoogleAuthProvider, signInWithPopup } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
 import { getFirestore, doc, setDoc, getDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
 const firebaseConfig = {
-  apiKey: "AIzaSyBAsZ-4RsrD7mO78MlYk0hMQMmm124R_yM",
-  authDomain: "ppty-77cb7.firebaseapp.com",
-  projectId: "ppty-77cb7",
-  storageBucket: "ppty-77cb7.firebasestorage.app",
-  messagingSenderId: "286646841994",
-  appId: "1:286646841994:web:d5432d9edf53e55fbf3373",
-  measurementId: "G-M9MV23TEWQ"
+    apiKey: "AIzaSyBAsZ-4RsrD7mO78MlYk0hMQMmm124R_yM",
+    authDomain: "ppty-77cb7.firebaseapp.com",
+    projectId: "ppty-77cb7",
+    storageBucket: "ppty-77cb7.firebasestorage.app",
+    messagingSenderId: "286646841994",
+    appId: "1:286646841994:web:d5432d9edf53e55fbf3373",
+    measurementId: "G-M9MV23TEWQ"
 };
 
-// Initialize Firebase
 const firebaseApp = initializeApp(firebaseConfig);
 const auth = getAuth(firebaseApp);
 const db = getFirestore(firebaseApp);
+const googleProvider = new GoogleAuthProvider();
 
 const API_URL = 'https://script.google.com/macros/s/AKfycbwtS0z1w7hBaZ5Tnz7vYIB0fqSCUOSsRen215sddHnstN2w4zAhOnJNyIiHV895H_I/exec'; 
 
@@ -72,7 +71,58 @@ class App {
         }
     }
 
-    /* FIREBASE AUTHENTICATION LOGIC */
+    showAuthModal(type = 'login') {
+        const isLogin = type === 'login';
+        const html = `
+            <div class="p-8">
+                <div class="flex justify-between items-center mb-6">
+                    <h3 class="text-2xl font-bold text-gray-900">${isLogin ? 'Welcome Back' : 'Create Account'}</h3>
+                    <button onclick="app.closeModal()" class="text-gray-400 hover:text-gray-600"><i class="fa-solid fa-xmark text-xl"></i></button>
+                </div>
+                <form id="auth-form" onsubmit="event.preventDefault(); app.handleAuth('${type}');" class="space-y-4">
+                    ${!isLogin ? `
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">I am a</label>
+                            <select id="auth-role" class="w-full border border-gray-300 rounded-lg p-3 outline-none focus:ring-2 focus:ring-blue-500">
+                                <option value="buyer">Buyer / Investor</option>
+                                <option value="seller">Property Seller / Developer</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Full Name</label>
+                            <input type="text" id="auth-name" required class="w-full border border-gray-300 rounded-lg p-3 outline-none focus:ring-2 focus:ring-blue-500">
+                        </div>
+                    ` : ''}
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Email Address</label>
+                        <input type="email" id="auth-email" required class="w-full border border-gray-300 rounded-lg p-3 outline-none focus:ring-2 focus:ring-blue-500">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Password</label>
+                        <input type="password" id="auth-password" required class="w-full border border-gray-300 rounded-lg p-3 outline-none focus:ring-2 focus:ring-blue-500">
+                    </div>
+                    <button type="submit" id="auth-submit-btn" class="w-full bg-blue-600 text-white rounded-lg p-3 font-medium hover:bg-blue-700 transition-colors mt-6 flex justify-center items-center">
+                        ${isLogin ? 'Sign In' : 'Register'}
+                    </button>
+                </form>
+
+                <div class="mt-6 flex items-center justify-between">
+                    <span class="border-b w-1/5 lg:w-1/4 border-gray-300"></span>
+                    <span class="text-xs text-center text-gray-500 uppercase font-medium">or continue with</span>
+                    <span class="border-b w-1/5 lg:w-1/4 border-gray-300"></span>
+                </div>
+                <button onclick="app.handleGoogleAuth('${type}')" type="button" class="w-full flex items-center justify-center gap-3 bg-white border border-gray-300 text-gray-700 rounded-lg p-3 font-medium hover:bg-gray-50 transition-colors mt-4 shadow-sm">
+                    <img src="https://www.svgrepo.com/show/475656/google-color.svg" class="w-5 h-5" alt="Google">
+                    Google
+                </button>
+
+                <div class="mt-6 text-center text-sm text-gray-500">
+                    ${isLogin ? `Don't have an account? <a href="#" onclick="app.showAuthModal('register')" class="text-blue-600 font-medium">Sign up</a>` : `Already have an account? <a href="#" onclick="app.showAuthModal('login')" class="text-blue-600 font-medium">Log in</a>`}
+                </div>
+            </div>`;
+        this.openModal(html);
+    }
+
     async handleAuth(action) {
         const btn = document.getElementById('auth-submit-btn');
         const originalText = btn.innerHTML;
@@ -87,11 +137,9 @@ class App {
                 const role = document.getElementById('auth-role').value;
                 const name = document.getElementById('auth-name').value;
                 
-                // 1. Create user in Firebase Auth
                 const userCredential = await createUserWithEmailAndPassword(auth, email, password);
                 const user = userCredential.user;
 
-                // 2. Save extended profile (role, name) to Firestore Database
                 await setDoc(doc(db, "users", user.uid), {
                     name: name,
                     role: role,
@@ -102,11 +150,9 @@ class App {
                 this.user = { userId: user.uid, role, name, email };
 
             } else if (action === 'login') {
-                // 1. Sign in with Firebase Auth
                 const userCredential = await signInWithEmailAndPassword(auth, email, password);
                 const user = userCredential.user;
 
-                // 2. Fetch user profile from Firestore to get their role and name
                 const docSnap = await getDoc(doc(db, "users", user.uid));
                 
                 if (docSnap.exists()) {
@@ -122,7 +168,6 @@ class App {
                 }
             }
 
-            // Save to local storage to maintain session
             localStorage.setItem('propMatchUser', JSON.stringify(this.user));
             this.closeModal();
             this.renderNav();
@@ -131,7 +176,6 @@ class App {
 
         } catch (err) {
             console.error(err);
-            // Translate common firebase errors
             let msg = "Authentication failed";
             if (err.code === 'auth/email-already-in-use') msg = "Email already in use!";
             if (err.code === 'auth/invalid-credential') msg = "Invalid email or password";
@@ -140,6 +184,55 @@ class App {
             this.showToast(msg, 'error');
             btn.innerHTML = originalText;
             btn.disabled = false;
+        }
+    }
+
+    async handleGoogleAuth(action) {
+        try {
+            const result = await signInWithPopup(auth, googleProvider);
+            const user = result.user;
+
+            const docRef = doc(db, "users", user.uid);
+            const docSnap = await getDoc(docRef);
+
+            if (docSnap.exists()) {
+                const userData = docSnap.data();
+                this.user = { 
+                    userId: user.uid, 
+                    role: userData.role, 
+                    name: userData.name, 
+                    email: user.email 
+                };
+            } else {
+                let role = 'buyer'; 
+                if (action === 'register') {
+                    const roleSelect = document.getElementById('auth-role');
+                    if (roleSelect) role = roleSelect.value;
+                }
+
+                const name = user.displayName || 'Google User';
+
+                await setDoc(docRef, {
+                    name: name,
+                    role: role,
+                    email: user.email,
+                    createdAt: new Date().toISOString()
+                });
+
+                this.user = { userId: user.uid, role, name, email: user.email };
+            }
+
+            localStorage.setItem('propMatchUser', JSON.stringify(this.user));
+            this.closeModal();
+            this.renderNav();
+            this.navigate(`dashboard-${this.user.role}`);
+            this.showToast(`Welcome, ${this.user.name}!`, 'success');
+
+        } catch (error) {
+            console.error(error);
+            if (error.code !== 'auth/popup-closed-by-user') {
+                this.showToast('Google Sign-In failed', 'error');
+            }
         }
     }
 
@@ -156,7 +249,6 @@ class App {
         }
     }
 
-    /* GOOGLE SHEETS LISTING LOGIC */
     async fetchAndRenderListings(context) {
         const containerId = context === 'seller' ? 'seller-listings-container' : 'buyer-listings-container';
         const container = document.getElementById(containerId);
@@ -231,131 +323,6 @@ class App {
         this.renderListingsGrid('buyer', filtered);
     }
 
-    async submitListing() {
-        const btn = document.getElementById('submit-listing-btn');
-        const originalText = btn.innerHTML;
-        btn.innerHTML = `<div class="loader w-5 h-5 border-2 border-t-white"></div>`;
-        btn.disabled = true;
-
-        const payload = {
-            action: 'addListing',
-            sellerId: this.user.userId,
-            sellerName: this.user.name,
-            title: document.getElementById('list-title').value,
-            type: document.getElementById('list-type').value,
-            price: document.getElementById('list-price').value,
-            location: document.getElementById('list-location').value,
-            description: document.getElementById('list-desc').value,
-            imageUrl: document.getElementById('list-image').value
-        };
-
-        try {
-            const res = await fetch(API_URL, {
-                method: 'POST',
-                headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-                body: JSON.stringify(payload),
-                redirect: 'follow'
-            });
-            const data = await res.json();
-
-            if (data.success) {
-                this.closeModal();
-                this.showToast('Property listed successfully!', 'success');
-                this.fetchAndRenderListings('seller');
-            } else {
-                this.showToast('Failed to add listing', 'error');
-                btn.innerHTML = originalText;
-                btn.disabled = false;
-            }
-        } catch (err) {
-            this.showToast('Error connecting to server', 'error');
-            btn.innerHTML = originalText;
-            btn.disabled = false;
-        }
-    }
-
-    async submitInterest(listingId) {
-        const btn = document.getElementById('submit-interest-btn');
-        const originalText = btn.innerHTML;
-        btn.innerHTML = `<div class="loader w-5 h-5 border-2 border-t-white"></div>`;
-        btn.disabled = true;
-
-        const payload = {
-            action: 'showInterest',
-            listingId: listingId,
-            buyerId: this.user.userId,
-            buyerName: this.user.name,
-            buyerEmail: this.user.email,
-            buyerPhone: document.getElementById('int-phone').value,
-            query: document.getElementById('int-query').value
-        };
-
-        try {
-            const res = await fetch(API_URL, {
-                method: 'POST',
-                headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-                body: JSON.stringify(payload),
-                redirect: 'follow'
-            });
-            const data = await res.json();
-
-            if (data.success) {
-                this.closeModal();
-                this.showToast('Your interest has been recorded!', 'success');
-            } else {
-                this.showToast('Failed to send interest', 'error');
-                btn.innerHTML = originalText;
-                btn.disabled = false;
-            }
-        } catch (err) {
-            this.showToast('Error connecting to server', 'error');
-            btn.innerHTML = originalText;
-            btn.disabled = false;
-        }
-    }
-
-    /* MODAL UI UTILITIES (Unchanged) */
-    showAuthModal(type = 'login') {
-        const isLogin = type === 'login';
-        const html = `
-            <div class="p-8">
-                <div class="flex justify-between items-center mb-6">
-                    <h3 class="text-2xl font-bold text-gray-900">${isLogin ? 'Welcome Back' : 'Create Account'}</h3>
-                    <button onclick="app.closeModal()" class="text-gray-400 hover:text-gray-600"><i class="fa-solid fa-xmark text-xl"></i></button>
-                </div>
-                <form id="auth-form" onsubmit="event.preventDefault(); app.handleAuth('${type}');" class="space-y-4">
-                    ${!isLogin ? `
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-1">I am a</label>
-                            <select id="auth-role" class="w-full border border-gray-300 rounded-lg p-3 outline-none focus:ring-2 focus:ring-blue-500">
-                                <option value="buyer">Buyer / Investor</option>
-                                <option value="seller">Property Seller / Developer</option>
-                            </select>
-                        </div>
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-1">Full Name</label>
-                            <input type="text" id="auth-name" required class="w-full border border-gray-300 rounded-lg p-3 outline-none focus:ring-2 focus:ring-blue-500">
-                        </div>
-                    ` : ''}
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-1">Email Address</label>
-                        <input type="email" id="auth-email" required class="w-full border border-gray-300 rounded-lg p-3 outline-none focus:ring-2 focus:ring-blue-500">
-                    </div>
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-1">Password</label>
-                        <input type="password" id="auth-password" required class="w-full border border-gray-300 rounded-lg p-3 outline-none focus:ring-2 focus:ring-blue-500">
-                    </div>
-                    <button type="submit" id="auth-submit-btn" class="w-full bg-blue-600 text-white rounded-lg p-3 font-medium hover:bg-blue-700 transition-colors mt-6 flex justify-center items-center">
-                        ${isLogin ? 'Sign In' : 'Register'}
-                    </button>
-                </form>
-                <div class="mt-6 text-center text-sm text-gray-500">
-                    ${isLogin ? `Don't have an account? <a href="#" onclick="app.showAuthModal('register')" class="text-blue-600 font-medium">Sign up</a>` : `Already have an account? <a href="#" onclick="app.showAuthModal('login')" class="text-blue-600 font-medium">Log in</a>`}
-                </div>
-            </div>`;
-        this.openModal(html);
-    }
-
     showAddListingModal() {
         const html = `
             <div class="p-8 max-h-[90vh] overflow-y-auto">
@@ -403,6 +370,49 @@ class App {
         this.openModal(html);
     }
 
+    async submitListing() {
+        const btn = document.getElementById('submit-listing-btn');
+        const originalText = btn.innerHTML;
+        btn.innerHTML = `<div class="loader w-5 h-5 border-2 border-t-white"></div>`;
+        btn.disabled = true;
+
+        const payload = {
+            action: 'addListing',
+            sellerId: this.user.userId,
+            sellerName: this.user.name,
+            title: document.getElementById('list-title').value,
+            type: document.getElementById('list-type').value,
+            price: document.getElementById('list-price').value,
+            location: document.getElementById('list-location').value,
+            description: document.getElementById('list-desc').value,
+            imageUrl: document.getElementById('list-image').value
+        };
+
+        try {
+            const res = await fetch(API_URL, {
+                method: 'POST',
+                headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+                body: JSON.stringify(payload),
+                redirect: 'follow'
+            });
+            const data = await res.json();
+
+            if (data.success) {
+                this.closeModal();
+                this.showToast('Property listed successfully!', 'success');
+                this.fetchAndRenderListings('seller');
+            } else {
+                this.showToast('Failed to add listing', 'error');
+                btn.innerHTML = originalText;
+                btn.disabled = false;
+            }
+        } catch (err) {
+            this.showToast('Error connecting to server', 'error');
+            btn.innerHTML = originalText;
+            btn.disabled = false;
+        }
+    }
+
     showInterestModal(listingId) {
         const listing = this.listings.find(l => l.id === listingId);
         const html = `
@@ -430,6 +440,46 @@ class App {
                 </form>
             </div>`;
         this.openModal(html);
+    }
+
+    async submitInterest(listingId) {
+        const btn = document.getElementById('submit-interest-btn');
+        const originalText = btn.innerHTML;
+        btn.innerHTML = `<div class="loader w-5 h-5 border-2 border-t-white"></div>`;
+        btn.disabled = true;
+
+        const payload = {
+            action: 'showInterest',
+            listingId: listingId,
+            buyerId: this.user.userId,
+            buyerName: this.user.name,
+            buyerEmail: this.user.email,
+            buyerPhone: document.getElementById('int-phone').value,
+            query: document.getElementById('int-query').value
+        };
+
+        try {
+            const res = await fetch(API_URL, {
+                method: 'POST',
+                headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+                body: JSON.stringify(payload),
+                redirect: 'follow'
+            });
+            const data = await res.json();
+
+            if (data.success) {
+                this.closeModal();
+                this.showToast('Your interest has been recorded!', 'success');
+            } else {
+                this.showToast('Failed to send interest', 'error');
+                btn.innerHTML = originalText;
+                btn.disabled = false;
+            }
+        } catch (err) {
+            this.showToast('Error connecting to server', 'error');
+            btn.innerHTML = originalText;
+            btn.disabled = false;
+        }
     }
 
     openModal(htmlContent) {
@@ -463,5 +513,4 @@ class App {
     }
 }
 
-// Attach to window so HTML inline onclick handlers can find it
 window.app = new App();
