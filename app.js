@@ -3,7 +3,7 @@ const API_URL = 'https://script.google.com/macros/s/AKfycbwtS0z1w7hBaZ5Tnz7vYIB0
 
 class App {
     constructor() {
-        this.user = JSON.parse(localStorage.getItem('primeEstatesUser')) || null;
+        this.user = JSON.parse(localStorage.getItem('propMatchUser')) || null;
         this.listings = [];
         this.init();
     }
@@ -237,7 +237,7 @@ class App {
                     name: data.name,
                     email: email
                 };
-                localStorage.setItem('primeEstatesUser', JSON.stringify(this.user));
+                localStorage.setItem('propMatchUser', JSON.stringify(this.user));
                 this.closeModal();
                 this.renderNav();
                 this.navigate(`dashboard-${this.user.role}`);
@@ -257,7 +257,7 @@ class App {
 
     logout() {
         this.user = null;
-        localStorage.removeItem('primeEstatesUser');
+        localStorage.removeItem('propMatchUser');
         this.renderNav();
         this.navigate('home');
         this.showToast('Logged out successfully', 'success');
