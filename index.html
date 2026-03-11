@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PrimeEstates | Premium Property Marketplace</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body class="bg-gray-50 text-gray-800 font-sans antialiased min-h-screen flex flex-col">
+
+    <nav class="bg-white shadow-sm fixed w-full z-50 top-0 transition-all duration-300" id="navbar">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between h-20">
+                <div class="flex items-center cursor-pointer" onclick="app.navigate('home')">
+                    <i class="fa-solid fa-building-user text-blue-600 text-3xl mr-3"></i>
+                    <span class="font-bold text-2xl tracking-tight text-gray-900">Prime<span class="text-blue-600">Estates</span></span>
+                </div>
+                <div class="flex items-center space-x-4" id="nav-actions">
+                    </div>
+            </div>
+        </div>
+    </nav>
+
+    <main class="flex-grow pt-20" id="main-content">
+        </main>
+
+    <footer class="bg-gray-900 text-white py-12 mt-auto">
+        <div class="max-w-7xl mx-auto px-4 text-center">
+            <p class="text-gray-400">&copy; 2026 PrimeEstates. Powered by secure cloud infrastructure.</p>
+        </div>
+    </footer>
+
+    <div id="toast-container" class="fixed bottom-5 right-5 z-50 flex flex-col gap-3"></div>
+
+    <div id="modal-backdrop" class="fixed inset-0 bg-gray-900 bg-opacity-50 backdrop-blur-sm z-50 hidden opacity-0 transition-opacity duration-300 flex items-center justify-center p-4">
+        <div id="modal-content" class="bg-white rounded-2xl shadow-2xl w-full max-w-lg transform scale-95 transition-transform duration-300 overflow-hidden">
+            </div>
+    </div>
+
+    <template id="tpl-home">
+        <div class="relative bg-white overflow-hidden">
+            <div class="max-w-7xl mx-auto">
+                <div class="relative z-10 pb-8 bg-white sm:pb-16 md:pb-20 lg:max-w-2xl lg:w-full lg:pb-28 xl:pb-32 pt-20">
+                    <main class="mt-10 mx-auto max-w-7xl px-4 sm:mt-12 sm:px-6 md:mt-16 lg:mt-20 lg:px-8 xl:mt-28">
+                        <div class="sm:text-center lg:text-left animate-fade-in-up">
+                            <h1 class="text-4xl tracking-tight font-extrabold text-gray-900 sm:text-5xl md:text-6xl">
+                                <span class="block xl:inline">Find your next</span>
+                                <span class="block text-blue-600 xl:inline">dream property</span>
+                            </h1>
+                            <p class="mt-3 text-base text-gray-500 sm:mt-5 sm:text-lg sm:max-w-xl sm:mx-auto md:mt-5 md:text-xl lg:mx-0">
+                                Connect directly with top developers and sellers. Whether you're looking for a commercial space, a housing project, or your forever home, PrimeEstates makes it seamless.
+                            </p>
+                            <div class="mt-5 sm:mt-8 sm:flex sm:justify-center lg:justify-start">
+                                <div class="rounded-md shadow">
+                                    <button onclick="app.showAuthModal('buyer')" class="w-full flex items-center justify-center px-8 py-3 border border-transparent text-base font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 md:py-4 md:text-lg transition-colors">
+                                        Browse Properties
+                                    </button>
+                                </div>
+                                <div class="mt-3 sm:mt-0 sm:ml-3">
+                                    <button onclick="app.showAuthModal('seller')" class="w-full flex items-center justify-center px-8 py-3 border border-transparent text-base font-medium rounded-md text-blue-700 bg-blue-100 hover:bg-blue-200 md:py-4 md:text-lg transition-colors">
+                                        List a Project
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </main>
+                </div>
+            </div>
+            <div class="lg:absolute lg:inset-y-0 lg:right-0 lg:w-1/2">
+                <img class="h-56 w-full object-cover sm:h-72 md:h-96 lg:w-full lg:h-full" src="https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?auto=format&fit=crop&w=1920&q=80" alt="Modern home">
+            </div>
+        </div>
+    </template>
+
+    <template id="tpl-dashboard-seller">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 animate-fade-in">
+            <div class="flex justify-between items-end mb-8 border-b pb-5">
+                <div>
+                    <h2 class="text-3xl font-bold text-gray-900">Seller Dashboard</h2>
+                    <p class="text-gray-500 mt-1">Manage your property listings and projects.</p>
+                </div>
+                <button onclick="app.showAddListingModal()" class="bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700 shadow-md transition-all flex items-center gap-2">
+                    <i class="fa-solid fa-plus"></i> New Listing
+                </button>
+            </div>
+            <div id="seller-listings-container" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                </div>
+        </div>
+    </template>
+
+    <template id="tpl-dashboard-buyer">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 animate-fade-in">
+            <div class="mb-8 border-b pb-5">
+                <h2 class="text-3xl font-bold text-gray-900">Explore Properties</h2>
+                <p class="text-gray-500 mt-1">Find and express interest in top real estate projects.</p>
+            </div>
+            
+            <div class="mb-8 flex gap-4">
+                <div class="relative flex-grow max-w-md">
+                    <i class="fa-solid fa-search absolute left-3 top-3.5 text-gray-400"></i>
+                    <input type="text" id="search-input" onkeyup="app.filterListings()" placeholder="Search by title or location..." class="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all">
+                </div>
+            </div>
+
+            <div id="buyer-listings-container" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                </div>
+        </div>
+    </template>
+
+    <script src="app.js"></script>
+</body>
+</html>
