@@ -17,7 +17,7 @@ const auth = getAuth(firebaseApp);
 const db = getFirestore(firebaseApp);
 const googleProvider = new GoogleAuthProvider();
 
-const API_URL = 'https://script.google.com/macros/s/AKfycbwtS0z1w7hBaZ5Tnz7vYIB0fqSCUOSsRen215sddHnstN2w4zAhOnJNyIiHV895H_I/exec'; 
+const API_URL = 'https://script.google.com/macros/s/AKfycbwwnaFq3D229dI7eSJYNipSJCzVURdtb-tF4tV5LNFXFcV_aa3T5kkstI0QkwfQDzoV/exec';
 
 class App {
     constructor() {
