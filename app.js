@@ -1,4 +1,4 @@
-// File: app.js
+// app.js
 const API_URL = 'https://script.google.com/macros/s/AKfycbwtS0z1w7hBaZ5Tnz7vYIB0fqSCUOSsRen215sddHnstN2w4zAhOnJNyIiHV895H_I/exec'; 
 
 class App {
@@ -225,6 +225,8 @@ class App {
         try {
             const res = await fetch(API_URL, {
                 method: 'POST',
+                // Added text/plain Content-Type to fix Google Apps Script CORS block
+                headers: { 'Content-Type': 'text/plain;charset=utf-8' },
                 body: JSON.stringify(payload),
                 redirect: 'follow'
             });
@@ -332,6 +334,8 @@ class App {
         try {
             const res = await fetch(API_URL, {
                 method: 'POST',
+                // Added text/plain Content-Type to fix Google Apps Script CORS block
+                headers: { 'Content-Type': 'text/plain;charset=utf-8' },
                 body: JSON.stringify(payload),
                 redirect: 'follow'
             });
@@ -407,6 +411,8 @@ class App {
         try {
             const res = await fetch(API_URL, {
                 method: 'POST',
+                // Added text/plain Content-Type to fix Google Apps Script CORS block
+                headers: { 'Content-Type': 'text/plain;charset=utf-8' },
                 body: JSON.stringify(payload),
                 redirect: 'follow'
             });
