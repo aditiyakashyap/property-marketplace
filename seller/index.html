@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Seller Portal | PropMatch</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="../styles.css">
+</head>
+<body class="bg-gray-50 text-gray-800">
+    <nav class="bg-white shadow-sm fixed w-full z-50 top-0">
+        <div class="max-w-7xl mx-auto px-4 flex justify-between h-20 items-center">
+            <div class="flex items-center gap-4">
+                <a href="../" class="text-gray-400 hover:text-gray-600"><i class="fa-solid fa-arrow-left"></i></a>
+                <div class="font-bold text-2xl text-gray-900">Prop<span class="text-blue-600">Match</span> <span class="text-xs bg-blue-100 text-blue-800 px-2 py-1 rounded uppercase tracking-wider ml-1 align-middle">Seller</span></div>
+            </div>
+            <div id="auth-section">
+                <button id="login-btn" class="bg-blue-600 text-white px-5 py-2 rounded-lg hover:bg-blue-700 font-medium transition-colors">Developer Login</button>
+            </div>
+        </div>
+    </nav>
+
+    <main id="dashboard" class="pt-24 max-w-7xl mx-auto px-4 hidden animate-fade-in">
+        <div class="flex gap-6 mb-8 border-b pb-4">
+            <button onclick="sellerApp.switchTab('listings')" class="font-bold text-lg text-blue-600 transition-colors" id="tab-listings">My Portfolio</button>
+            <button onclick="sellerApp.switchTab('queries')" class="font-bold text-lg text-gray-500 hover:text-gray-700 transition-colors" id="tab-queries">Buyer Queries</button>
+        </div>
+
+        <div id="section-listings">
+            <div class="flex justify-between items-center mb-6">
+                <div>
+                    <h2 class="text-2xl font-bold text-gray-900">Manage Properties</h2>
+                    <p class="text-sm text-gray-500">Add or remove listings from your portfolio.</p>
+                </div>
+                <button onclick="sellerApp.toggleListingForm()" class="bg-blue-600 text-white px-5 py-2 rounded-lg shadow-sm hover:bg-blue-700 transition-colors font-medium flex items-center gap-2">
+                    <i class="fa-solid fa-plus"></i> New Listing
+                </button>
+            </div>
+            
+            <form id="listing-form" class="hidden bg-white p-6 rounded-xl shadow-sm border border-gray-100 mb-8 space-y-4 animate-fade-in-up">
+                <h3 class="font-bold text-lg text-gray-900 mb-4 border-b pb-2">Publish New Property</h3>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-xs font-bold text-gray-500 uppercase mb-1">Property Title</label>
+                        <input type="text" id="prop-title" required class="border border-gray-300 p-3 rounded-lg w-full outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-gray-500 uppercase mb-1">Location / Area</label>
+                        <input type="text" id="prop-location" required class="border border-gray-300 p-3 rounded-lg w-full outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-gray-500 uppercase mb-1">Property Type</label>
+                        <select id="prop-type" class="border border-gray-300 p-3 rounded-lg w-full outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500">
+                            <option value="Apartment">Apartment</option>
+                            <option value="Commercial">Commercial</option>
+                            <option value="Villa">Villa</option>
+                            <option value="Plot/Land">Plot/Land</option>
+                            <option value="Housing Project">Housing Project</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-gray-500 uppercase mb-1">Price (₹)</label>
+                        <input type="number" id="prop-price" required class="border border-gray-300 p-3 rounded-lg w-full outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500">
+                    </div>
+                </div>
+                <div>
+                    <label class="block text-xs font-bold text-gray-500 uppercase mb-1">Description</label>
+                    <textarea id="prop-desc" required class="border border-gray-300 p-3 rounded-lg w-full h-24 outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500"></textarea>
+                </div>
+                <div>
+                    <label class="block text-xs font-bold text-gray-500 uppercase mb-1">Image URL</label>
+                    <input type="url" id="prop-image" placeholder="https://example.com/image.jpg" class="border border-gray-300 p-3 rounded-lg w-full outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500">
+                </div>
+                <div class="flex justify-end pt-2">
+                    <button type="button" onclick="sellerApp.toggleListingForm()" class="px-6 py-2 text-gray-500 hover:text-gray-800 font-medium mr-2">Cancel</button>
+                    <button type="submit" id="publish-btn" class="bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700 font-medium transition-colors">Publish to Market</button>
+                </div>
+            </form>
+
+            <div id="my-listings-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"></div>
+        </div>
+
+        <div id="section-queries" class="hidden">
+            <h2 class="text-2xl font-bold text-gray-900 mb-2">Inquiries from Buyers</h2>
+            <p class="text-sm text-gray-500 mb-6">Respond to anonymous queries about your properties.</p>
+            <div id="queries-list" class="space-y-4"></div>
+        </div>
+    </main>
+
+    <script type="module" src="seller.js"></script>
+</body>
+</html>
