@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Find Properties | PropMatch</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="../styles.css">
+</head>
+<body class="bg-gray-50 text-gray-800">
+    <nav class="bg-white shadow-sm fixed w-full z-50 top-0">
+        <div class="max-w-7xl mx-auto px-4 flex justify-between h-20 items-center">
+            <div class="flex items-center gap-4">
+                <a href="../" class="text-gray-400 hover:text-gray-600"><i class="fa-solid fa-arrow-left"></i></a>
+                <div class="font-bold text-2xl text-gray-900 cursor-pointer" onclick="buyerApp.switchTab('home')">Prop<span class="text-blue-600">Match</span></div>
+            </div>
+            <div id="auth-section">
+                <button id="login-btn" class="bg-gray-900 text-white px-5 py-2 rounded-lg hover:bg-black">Login to Continue</button>
+            </div>
+        </div>
+    </nav>
+
+    <main id="main-app" class="pt-24 max-w-7xl mx-auto px-4 hidden animate-fade-in">
+        <div class="flex justify-between items-center mb-8 border-b pb-4">
+            <div class="flex gap-4">
+                <button onclick="buyerApp.switchTab('home')" class="font-bold text-lg text-blue-600 transition-colors" id="tab-home">Explore Properties</button>
+                <button onclick="buyerApp.switchTab('interests')" class="font-bold text-lg text-gray-500 transition-colors" id="tab-interests">My Interests & Updates <span id="notif-badge" class="hidden bg-red-500 text-white text-xs px-2 py-0.5 rounded-full ml-1">New</span></button>
+            </div>
+        </div>
+
+        <div id="section-home">
+            <div class="bg-white p-4 rounded-lg shadow-sm border border-gray-100 mb-8 flex flex-wrap gap-4 items-end">
+                <div class="flex-grow">
+                    <label class="text-xs font-bold text-gray-500 uppercase">Search</label>
+                    <input type="text" id="search-keyword" placeholder="Area, Location, Developer or Title..." class="w-full border border-gray-300 p-2 rounded outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500">
+                </div>
+                <div>
+                    <label class="text-xs font-bold text-gray-500 uppercase">Property Type</label>
+                    <select id="search-type" class="w-full border border-gray-300 p-2 rounded outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500">
+                        <option value="">All Types</option>
+                        <option value="Apartment">Apartment</option>
+                        <option value="Commercial">Commercial</option>
+                        <option value="Villa">Villa</option>
+                        <option value="Plot/Land">Plot/Land</option>
+                    </select>
+                </div>
+                <button onclick="buyerApp.fetchAndFilterListings()" class="bg-blue-600 text-white px-6 py-2 rounded h-[42px] hover:bg-blue-700 transition-colors"><i class="fa-solid fa-search"></i> Search</button>
+            </div>
+
+            <div id="market-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"></div>
+        </div>
+
+        <div id="section-interests" class="hidden">
+            <h2 class="text-2xl font-bold mb-6">Updates from Sellers</h2>
+            <div id="my-queries-list" class="space-y-4"></div>
+        </div>
+    </main>
+
+    <div id="query-modal" class="fixed inset-0 bg-gray-900 bg-opacity-50 backdrop-blur-sm hidden flex items-center justify-center z-50 transition-opacity">
+        <div class="bg-white p-6 rounded-xl shadow-2xl w-full max-w-md animate-fade-in-up">
+            <h3 class="text-xl font-bold mb-2">Express Interest</h3>
+            <p class="text-sm text-gray-500 mb-4">Your contact details are kept strictly confidential. The seller will only see your inquiry.</p>
+            <textarea id="query-text" rows="4" placeholder="What would you like to know about this property?" class="w-full border border-gray-300 p-3 rounded-lg mb-4 outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500"></textarea>
+            <div class="flex justify-end gap-3">
+                <button onclick="document.getElementById('query-modal').classList.add('hidden')" class="px-4 py-2 text-gray-500 hover:text-gray-800 font-medium">Cancel</button>
+                <button id="submit-query-btn" class="bg-gray-900 text-white px-6 py-2 rounded-lg hover:bg-black font-medium transition-colors">Send Anonymously</button>
+            </div>
+        </div>
+    </div>
+
+    <script type="module" src="buyer.js"></script>
+</body>
+</html>
