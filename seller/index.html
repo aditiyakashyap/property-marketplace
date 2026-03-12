@@ -12,46 +12,79 @@
     <nav class="bg-white shadow-sm fixed w-full z-50 top-0">
         <div class="max-w-7xl mx-auto px-4 flex justify-between h-20 items-center">
             <div class="flex items-center gap-4">
-                <a href="../" class="text-gray-400 hover:text-gray-600"><i class="fa-solid fa-arrow-left"></i></a>
+                <a href="../" class="text-gray-400 hover:text-gray-600 transition-colors"><i class="fa-solid fa-arrow-left"></i></a>
                 <div class="font-bold text-2xl text-gray-900">Prop<span class="text-blue-600">Match</span> <span class="text-xs bg-blue-100 text-blue-800 px-2 py-1 rounded uppercase tracking-wider ml-1 align-middle">Seller</span></div>
             </div>
             <div id="auth-section">
-                <button id="login-btn" class="bg-blue-600 text-white px-5 py-2 rounded-lg hover:bg-blue-700 font-medium transition-colors">Developer Login</button>
+                <button id="login-btn" class="bg-blue-600 text-white px-5 py-2 rounded-lg hover:bg-blue-700 font-medium transition-all shadow-md hover:shadow-lg">Developer Login</button>
             </div>
         </div>
     </nav>
 
     <main id="dashboard" class="pt-24 max-w-7xl mx-auto px-4 hidden animate-fade-in">
-        <div class="flex gap-6 mb-8 border-b pb-4">
-            <button onclick="sellerApp.switchTab('listings')" class="font-bold text-lg text-blue-600 transition-colors" id="tab-listings">My Portfolio</button>
-            <button onclick="sellerApp.switchTab('queries')" class="font-bold text-lg text-gray-500 hover:text-gray-700 transition-colors" id="tab-queries">Buyer Queries</button>
+        
+        <div class="bg-gradient-to-r from-blue-700 to-indigo-800 rounded-2xl shadow-xl p-8 mb-8 text-white relative overflow-hidden">
+            <div class="relative z-10">
+                <h1 class="text-3xl md:text-4xl font-bold mb-2">Welcome back, <span id="seller-welcome-name">Developer</span>! 👋</h1>
+                <p class="text-blue-100 mb-8 text-lg">Here is a quick overview of your property portfolio today.</p>
+                
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <div class="bg-white/10 backdrop-blur-md rounded-xl p-5 border border-white/20 hover:bg-white/20 transition-colors">
+                        <div class="flex items-center justify-between mb-2">
+                            <p class="text-blue-100 text-sm font-medium uppercase tracking-wider">Active Listings</p>
+                            <i class="fa-solid fa-building text-blue-300 opacity-70"></i>
+                        </div>
+                        <p class="text-4xl font-bold" id="stat-listings">0</p>
+                    </div>
+                    <div class="bg-white/10 backdrop-blur-md rounded-xl p-5 border border-white/20 hover:bg-white/20 transition-colors">
+                        <div class="flex items-center justify-between mb-2">
+                            <p class="text-blue-100 text-sm font-medium uppercase tracking-wider">Total Inquiries</p>
+                            <i class="fa-solid fa-envelope-open-text text-blue-300 opacity-70"></i>
+                        </div>
+                        <p class="text-4xl font-bold" id="stat-queries">0</p>
+                    </div>
+                    <div class="bg-white/10 backdrop-blur-md rounded-xl p-5 border border-white/20 hover:bg-white/20 transition-colors">
+                        <div class="flex items-center justify-between mb-2">
+                            <p class="text-blue-100 text-sm font-medium uppercase tracking-wider">Pending Replies</p>
+                            <i class="fa-solid fa-clock text-yellow-300 opacity-70"></i>
+                        </div>
+                        <p class="text-4xl font-bold text-yellow-300" id="stat-pending">0</p>
+                    </div>
+                </div>
+            </div>
+            <i class="fa-solid fa-city text-[200px] absolute -bottom-10 -right-10 text-white/5 transform -rotate-6"></i>
         </div>
 
-        <div id="section-listings">
-            <div class="flex justify-between items-center mb-6">
+        <div class="flex gap-6 mb-8 border-b border-gray-200 pb-4">
+            <button onclick="sellerApp.switchTab('listings')" class="font-bold text-lg text-blue-600 border-b-2 border-blue-600 pb-4 -mb-[18px] transition-all" id="tab-listings">My Portfolio</button>
+            <button onclick="sellerApp.switchTab('queries')" class="font-bold text-lg text-gray-400 hover:text-gray-700 pb-4 -mb-[18px] transition-all" id="tab-queries">Buyer Queries</button>
+        </div>
+
+        <div id="section-listings" class="animate-fade-in-up">
+            <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 gap-4">
                 <div>
                     <h2 class="text-2xl font-bold text-gray-900">Manage Properties</h2>
-                    <p class="text-sm text-gray-500">Add or remove listings from your portfolio.</p>
+                    <p class="text-sm text-gray-500 mt-1">Add, review, or remove listings from your public portfolio.</p>
                 </div>
-                <button onclick="sellerApp.toggleListingForm()" class="bg-blue-600 text-white px-5 py-2 rounded-lg shadow-sm hover:bg-blue-700 transition-colors font-medium flex items-center gap-2">
-                    <i class="fa-solid fa-plus"></i> New Listing
+                <button onclick="sellerApp.toggleListingForm()" class="bg-blue-600 text-white px-6 py-2.5 rounded-lg shadow-md hover:shadow-lg hover:bg-blue-700 transition-all font-medium flex items-center gap-2 transform hover:-translate-y-0.5">
+                    <i class="fa-solid fa-plus"></i> Publish New Listing
                 </button>
             </div>
             
-            <form id="listing-form" class="hidden bg-white p-6 rounded-xl shadow-sm border border-gray-100 mb-8 space-y-4 animate-fade-in-up">
-                <h3 class="font-bold text-lg text-gray-900 mb-4 border-b pb-2">Publish New Property</h3>
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <form id="listing-form" class="hidden bg-white p-8 rounded-2xl shadow-lg border border-gray-100 mb-8 space-y-5">
+                <h3 class="font-bold text-xl text-gray-900 mb-4 border-b border-gray-100 pb-3"><i class="fa-solid fa-pen-to-square text-blue-600 mr-2"></i> Property Details</h3>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
                     <div>
-                        <label class="block text-xs font-bold text-gray-500 uppercase mb-1">Property Title</label>
-                        <input type="text" id="prop-title" required class="border border-gray-300 p-3 rounded-lg w-full outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500">
+                        <label class="block text-xs font-bold text-gray-500 uppercase tracking-wide mb-1.5">Property Title</label>
+                        <input type="text" id="prop-title" required class="bg-gray-50 border border-gray-200 p-3 rounded-xl w-full outline-none focus:border-blue-500 focus:bg-white transition-all">
                     </div>
                     <div>
-                        <label class="block text-xs font-bold text-gray-500 uppercase mb-1">Location / Area</label>
-                        <input type="text" id="prop-location" required class="border border-gray-300 p-3 rounded-lg w-full outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500">
+                        <label class="block text-xs font-bold text-gray-500 uppercase tracking-wide mb-1.5">Location / Area</label>
+                        <input type="text" id="prop-location" required class="bg-gray-50 border border-gray-200 p-3 rounded-xl w-full outline-none focus:border-blue-500 focus:bg-white transition-all">
                     </div>
                     <div>
-                        <label class="block text-xs font-bold text-gray-500 uppercase mb-1">Property Type</label>
-                        <select id="prop-type" class="border border-gray-300 p-3 rounded-lg w-full outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500">
+                        <label class="block text-xs font-bold text-gray-500 uppercase tracking-wide mb-1.5">Property Type</label>
+                        <select id="prop-type" class="bg-gray-50 border border-gray-200 p-3 rounded-xl w-full outline-none focus:border-blue-500 focus:bg-white transition-all">
                             <option value="Apartment">Apartment</option>
                             <option value="Commercial">Commercial</option>
                             <option value="Villa">Villa</option>
@@ -60,31 +93,31 @@
                         </select>
                     </div>
                     <div>
-                        <label class="block text-xs font-bold text-gray-500 uppercase mb-1">Price (₹)</label>
-                        <input type="number" id="prop-price" required class="border border-gray-300 p-3 rounded-lg w-full outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500">
+                        <label class="block text-xs font-bold text-gray-500 uppercase tracking-wide mb-1.5">Price (₹)</label>
+                        <input type="number" id="prop-price" required class="bg-gray-50 border border-gray-200 p-3 rounded-xl w-full outline-none focus:border-blue-500 focus:bg-white transition-all">
                     </div>
                 </div>
                 <div>
-                    <label class="block text-xs font-bold text-gray-500 uppercase mb-1">Description</label>
-                    <textarea id="prop-desc" required class="border border-gray-300 p-3 rounded-lg w-full h-24 outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500"></textarea>
+                    <label class="block text-xs font-bold text-gray-500 uppercase tracking-wide mb-1.5">Description</label>
+                    <textarea id="prop-desc" required class="bg-gray-50 border border-gray-200 p-3 rounded-xl w-full h-28 outline-none focus:border-blue-500 focus:bg-white transition-all"></textarea>
                 </div>
                 <div>
-                    <label class="block text-xs font-bold text-gray-500 uppercase mb-1">Image URL</label>
-                    <input type="url" id="prop-image" placeholder="https://example.com/image.jpg" class="border border-gray-300 p-3 rounded-lg w-full outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500">
+                    <label class="block text-xs font-bold text-gray-500 uppercase tracking-wide mb-1.5">Image URL</label>
+                    <input type="url" id="prop-image" placeholder="https://example.com/image.jpg" class="bg-gray-50 border border-gray-200 p-3 rounded-xl w-full outline-none focus:border-blue-500 focus:bg-white transition-all">
                 </div>
-                <div class="flex justify-end pt-2">
-                    <button type="button" onclick="sellerApp.toggleListingForm()" class="px-6 py-2 text-gray-500 hover:text-gray-800 font-medium mr-2">Cancel</button>
-                    <button type="submit" id="publish-btn" class="bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700 font-medium transition-colors">Publish to Market</button>
+                <div class="flex justify-end pt-4 border-t border-gray-100">
+                    <button type="button" onclick="sellerApp.toggleListingForm()" class="px-6 py-2.5 text-gray-500 hover:text-gray-900 font-medium mr-3 transition-colors">Cancel</button>
+                    <button type="submit" id="publish-btn" class="bg-blue-600 text-white px-8 py-2.5 rounded-xl hover:bg-blue-700 font-medium transition-all shadow-md hover:shadow-lg">Publish to Market</button>
                 </div>
             </form>
 
             <div id="my-listings-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"></div>
         </div>
 
-        <div id="section-queries" class="hidden">
-            <h2 class="text-2xl font-bold text-gray-900 mb-2">Inquiries from Buyers</h2>
-            <p class="text-sm text-gray-500 mb-6">Respond to anonymous queries about your properties.</p>
-            <div id="queries-list" class="space-y-4"></div>
+        <div id="section-queries" class="hidden animate-fade-in-up">
+            <h2 class="text-2xl font-bold text-gray-900 mb-1">Inquiries from Buyers</h2>
+            <p class="text-sm text-gray-500 mb-6">Respond to anonymous queries to close deals faster.</p>
+            <div id="queries-list" class="space-y-4 max-w-4xl"></div>
         </div>
     </main>
 
