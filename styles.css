@@ -52,7 +52,7 @@ body {
     border-top: 3px solid #2563eb;
     width: 24px;
     height: 24px;
-    -webkit-animation: spin 1s linear infinite; /* Safari */
+    -webkit-animation: spin 1s linear infinite;
     animation: spin 1s linear infinite;
 }
 
