@@ -5,8 +5,6 @@ class SellerApp {
     constructor() {
         this.user = null;
         this.initAuth();
-        
-        document.getElementById('login-btn').addEventListener('click', () => this.login());
         document.getElementById('listing-form').addEventListener('submit', (e) => this.saveListing(e));
     }
 
@@ -15,7 +13,6 @@ class SellerApp {
             if (user) {
                 this.user = user;
                 
-                // NEW: Populate Welcome Banner Name
                 const welcomeName = document.getElementById('seller-welcome-name');
                 if(welcomeName) welcomeName.innerText = user.displayName;
 
@@ -27,10 +24,17 @@ class SellerApp {
                         </div>
                         <button onclick="sellerApp.logout()" class="text-gray-400 hover:text-red-500 transition-colors bg-white border border-gray-200 w-10 h-10 rounded-full flex items-center justify-center shadow-sm" title="Logout"><i class="fa-solid fa-arrow-right-from-bracket"></i></button>
                     </div>`;
+                
+                // Show App, Hide Landing
+                document.getElementById('landing-page').classList.add('hidden');
                 document.getElementById('dashboard').classList.remove('hidden');
+                
                 this.loadListings();
                 this.loadQueries();
             } else {
+                // Show Landing, Hide App
+                document.getElementById('auth-section').innerHTML = `<button onclick="sellerApp.login()" class="bg-blue-600 text-white px-5 py-2 rounded-lg hover:bg-blue-700 font-medium transition-all shadow-md">Developer Login</button>`;
+                document.getElementById('landing-page').classList.remove('hidden');
                 document.getElementById('dashboard').classList.add('hidden');
             }
         });
@@ -50,7 +54,6 @@ class SellerApp {
         document.getElementById('section-listings').classList.toggle('hidden', tab !== 'listings');
         document.getElementById('section-queries').classList.toggle('hidden', tab !== 'queries');
         
-        // Stylish tab switching
         document.getElementById('tab-listings').className = tab === 'listings' ? 'font-bold text-lg text-blue-600 border-b-2 border-blue-600 pb-4 -mb-[18px] transition-all' : 'font-bold text-lg text-gray-400 hover:text-gray-700 pb-4 -mb-[18px] transition-all';
         document.getElementById('tab-queries').className = tab === 'queries' ? 'font-bold text-lg text-blue-600 border-b-2 border-blue-600 pb-4 -mb-[18px] transition-all' : 'font-bold text-lg text-gray-400 hover:text-gray-700 pb-4 -mb-[18px] transition-all';
     }
@@ -99,7 +102,6 @@ class SellerApp {
             const snapshot = await getDocs(q);
             grid.innerHTML = '';
             
-            // NEW: Update Dashboard Stat
             const statListings = document.getElementById('stat-listings');
             if(statListings) statListings.innerText = snapshot.size;
 
@@ -156,7 +158,6 @@ class SellerApp {
             const snapshot = await getDocs(q);
             list.innerHTML = '';
 
-            // NEW: Update Dashboard Stats
             let pendingCount = 0;
             snapshot.forEach(docSnap => { if(!docSnap.data().reply) pendingCount++; });
             
