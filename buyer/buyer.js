@@ -1,4 +1,3 @@
-
 // File: buyer/buyer.js
 import { auth, db, googleProvider, signInWithPopup, signOut, onAuthStateChanged, collection, addDoc, getDocs, query, where, serverTimestamp } from '../firebase-config.js';
 
@@ -16,11 +15,19 @@ class BuyerApp {
         onAuthStateChanged(auth, (user) => {
             if (user) {
                 this.user = user;
+                
+                // NEW: Populate Welcome Banner Name
+                const welcomeName = document.getElementById('buyer-welcome-name');
+                if(welcomeName) welcomeName.innerText = user.displayName.split(' ')[0];
+
                 document.getElementById('auth-section').innerHTML = `
                     <div class="flex items-center gap-4">
-                        <button onclick="buyerApp.switchTab('interests')" class="text-blue-600 hover:text-blue-800 transition-colors"><i class="fa-solid fa-bell text-xl"></i></button>
-                        <span class="text-gray-700 font-medium hidden sm:inline">Hi, ${user.displayName.split(' ')[0]}</span>
-                        <button onclick="buyerApp.logout()" class="text-gray-500 hover:text-red-600 transition-colors"><i class="fa-solid fa-arrow-right-from-bracket text-xl"></i></button>
+                        <button onclick="buyerApp.switchTab('interests')" class="text-blue-600 hover:text-blue-800 transition-colors bg-blue-50 w-10 h-10 rounded-full flex items-center justify-center"><i class="fa-solid fa-bell text-lg"></i></button>
+                        <div class="bg-gray-100 px-4 py-2 rounded-full hidden sm:flex items-center gap-2 border border-gray-200">
+                            <img src="${user.photoURL}" class="w-6 h-6 rounded-full" onerror="this.style.display='none'">
+                            <span class="text-gray-700 font-medium text-sm">${user.displayName.split(' ')[0]}</span>
+                        </div>
+                        <button onclick="buyerApp.logout()" class="text-gray-400 hover:text-red-500 transition-colors bg-white border border-gray-200 w-10 h-10 rounded-full flex items-center justify-center shadow-sm" title="Logout"><i class="fa-solid fa-arrow-right-from-bracket"></i></button>
                     </div>`;
                 document.getElementById('main-app').classList.remove('hidden');
                 this.fetchAndFilterListings();
@@ -32,12 +39,8 @@ class BuyerApp {
     }
 
     async login() {
-        try { 
-            await signInWithPopup(auth, googleProvider); 
-        } catch (e) { 
-            alert("Login failed. Please try again."); 
-            console.error(e);
-        }
+        try { await signInWithPopup(auth, googleProvider); } 
+        catch (e) { alert("Login failed. Please try again."); console.error(e); }
     }
 
     async logout() {
@@ -48,8 +51,10 @@ class BuyerApp {
     switchTab(tab) {
         document.getElementById('section-home').classList.toggle('hidden', tab !== 'home');
         document.getElementById('section-interests').classList.toggle('hidden', tab !== 'interests');
-        document.getElementById('tab-home').className = tab === 'home' ? 'font-bold text-lg text-blue-600 transition-colors' : 'font-bold text-lg text-gray-500 hover:text-gray-700 transition-colors';
-        document.getElementById('tab-interests').className = tab === 'interests' ? 'font-bold text-lg text-blue-600 transition-colors' : 'font-bold text-lg text-gray-500 hover:text-gray-700 transition-colors';
+        
+        // Stylish tab switching
+        document.getElementById('tab-home').className = tab === 'home' ? 'font-bold text-lg text-blue-600 border-b-2 border-blue-600 pb-4 -mb-[18px] transition-all' : 'font-bold text-lg text-gray-400 hover:text-gray-700 pb-4 -mb-[18px] transition-all';
+        document.getElementById('tab-interests').className = tab === 'interests' ? 'font-bold text-lg text-blue-600 border-b-2 border-blue-600 pb-4 -mb-[18px] transition-all relative' : 'font-bold text-lg text-gray-400 hover:text-gray-700 pb-4 -mb-[18px] transition-all relative';
         
         if(tab === 'interests') this.loadMyInterests();
     }
@@ -88,9 +93,12 @@ class BuyerApp {
         
         if (listings.length === 0) {
             grid.innerHTML = `
-                <div class="col-span-full text-center py-16 bg-white rounded-xl border border-dashed border-gray-300">
-                    <i class="fa-regular fa-folder-open text-4xl text-gray-400 mb-3"></i>
-                    <p class="text-gray-500 text-lg">No properties match your search.</p>
+                <div class="col-span-full text-center py-20 bg-gradient-to-b from-gray-50 to-white rounded-2xl border border-gray-200 shadow-sm">
+                    <div class="bg-blue-50 w-20 h-20 rounded-full flex items-center justify-center mx-auto mb-4">
+                        <i class="fa-solid fa-magnifying-glass text-4xl text-blue-500"></i>
+                    </div>
+                    <h3 class="text-xl font-bold text-gray-900 mb-1">No matches found</h3>
+                    <p class="text-gray-500">Try adjusting your filters or search terms.</p>
                 </div>`;
             return;
         }
@@ -98,20 +106,22 @@ class BuyerApp {
         grid.innerHTML = '';
         listings.forEach(data => {
             grid.innerHTML += `
-                <div class="property-card bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden flex flex-col">
-                    <div class="relative h-48 overflow-hidden bg-gray-200">
-                        <img src="${data.imageUrl}" class="w-full h-full object-cover">
-                        <div class="absolute top-3 left-3 bg-white/90 backdrop-blur px-2 py-1 rounded shadow-sm text-xs font-bold text-gray-800">
+                <div class="property-card bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden flex flex-col group">
+                    <div class="relative h-56 overflow-hidden bg-gray-200">
+                        <img src="${data.imageUrl}" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500">
+                        <div class="absolute top-3 left-3 bg-white/95 backdrop-blur px-3 py-1.5 rounded-lg shadow-sm text-xs font-bold text-gray-800">
                             ID: ${data.serialNum}
                         </div>
                     </div>
-                    <div class="p-5 flex-grow flex flex-col">
-                        <p class="text-xs text-blue-600 font-bold uppercase tracking-wider mb-1">${data.type}</p>
+                    <div class="p-6 flex-grow flex flex-col">
+                        <p class="text-xs text-blue-600 font-bold uppercase tracking-widest mb-1.5">${data.type}</p>
                         <h3 class="font-bold text-xl text-gray-900 leading-tight mb-2">${data.title}</h3>
-                        <p class="text-gray-500 text-sm mb-4"><i class="fa-solid fa-location-dot mr-1"></i> ${data.location}</p>
-                        <div class="mt-auto pt-4 border-t border-gray-100 flex justify-between items-center">
-                            <p class="text-xl font-bold text-gray-900">₹${Number(data.price).toLocaleString('en-IN')}</p>
-                            <button onclick="buyerApp.openQueryModal('${data.id}')" class="bg-gray-900 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-black transition-colors">Ask / Interest</button>
+                        <p class="text-gray-500 text-sm mb-6"><i class="fa-solid fa-location-dot mr-1 text-gray-400"></i> ${data.location}</p>
+                        <div class="mt-auto pt-5 border-t border-gray-100 flex justify-between items-center">
+                            <p class="text-2xl font-bold text-gray-900">₹${Number(data.price).toLocaleString('en-IN')}</p>
+                            <button onclick="buyerApp.openQueryModal('${data.id}')" class="bg-gray-900 text-white px-5 py-2.5 rounded-xl text-sm font-medium hover:bg-black transition-colors shadow-md hover:shadow-lg flex items-center gap-2">
+                                Ask <i class="fa-solid fa-arrow-right"></i>
+                            </button>
                         </div>
                     </div>
                 </div>
@@ -123,8 +133,6 @@ class BuyerApp {
         this.selectedListing = this.allListings.find(l => l.id === listingId);
         document.getElementById('query-text').value = '';
         document.getElementById('query-modal').classList.remove('hidden');
-        
-        document.getElementById('submit-query-btn').onclick = () => this.submitQuery();
     }
 
     async submitQuery() {
@@ -134,7 +142,7 @@ class BuyerApp {
         if(!text.trim()) return alert("Please enter your query.");
 
         btn.disabled = true;
-        btn.innerHTML = 'Sending...';
+        btn.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin"></i> Sending...';
 
         const queryData = {
             listingId: this.selectedListing.id,
@@ -150,68 +158,75 @@ class BuyerApp {
 
         try {
             await addDoc(collection(db, "queries"), queryData);
-            alert("Inquiry sent securely! The seller will reply soon.");
             document.getElementById('query-modal').classList.add('hidden');
             this.loadMyInterests();
         } catch (err) {
             alert("Failed to send query. Try again.");
-            console.error(err);
         } finally {
             btn.disabled = false;
-            btn.innerHTML = 'Send Anonymously';
+            btn.innerHTML = '<i class="fa-solid fa-paper-plane"></i> Send Securely';
         }
     }
 
     async loadMyInterests() {
         const list = document.getElementById('my-queries-list');
-        list.innerHTML = `<div class="flex justify-center py-8"><div class="loader"></div></div>`;
+        list.innerHTML = `<div class="flex justify-center py-12"><div class="loader"></div></div>`;
 
         try {
             const q = query(collection(db, "queries"), where("buyerId", "==", this.user.uid));
             const snapshot = await getDocs(q);
             list.innerHTML = '';
             
-            let hasNewReplies = false;
+            // NEW: Update Dashboard Stats
+            let repliedCount = 0;
+            snapshot.forEach(docSnap => { if(docSnap.data().reply) repliedCount++; });
+            
+            const statSent = document.getElementById('stat-sent');
+            const statReplies = document.getElementById('stat-replies');
+            if(statSent) statSent.innerText = snapshot.size;
+            if(statReplies) statReplies.innerText = repliedCount;
+            
+            const badge = document.getElementById('notif-badge');
+            if (badge) badge.classList.toggle('hidden', repliedCount === 0);
 
             if(snapshot.empty) {
                 list.innerHTML = `
-                    <div class="text-center py-12 bg-white rounded-xl border border-dashed border-gray-300">
-                        <i class="fa-regular fa-comments text-4xl text-gray-400 mb-3"></i>
-                        <p class="text-gray-500 text-lg">You haven't asked any queries yet.</p>
+                    <div class="text-center py-20 bg-gradient-to-b from-gray-50 to-white rounded-2xl border border-gray-200 shadow-sm">
+                        <div class="bg-blue-50 w-20 h-20 rounded-full flex items-center justify-center mx-auto mb-4">
+                            <i class="fa-regular fa-comments text-4xl text-blue-500"></i>
+                        </div>
+                        <h3 class="text-xl font-bold text-gray-900 mb-1">No inquiries yet</h3>
+                        <p class="text-gray-500">When you ask a developer a question, it will appear here.</p>
                     </div>`;
                 return;
             }
 
             snapshot.forEach(docSnap => {
                 const data = docSnap.data();
-                if (data.reply) hasNewReplies = true; 
                 
                 list.innerHTML += `
-                    <div class="bg-white p-5 rounded-xl shadow-sm border border-gray-100 border-l-4 ${data.reply ? 'border-l-green-500' : 'border-l-gray-300'}">
-                        <div class="flex justify-between items-start mb-3">
+                    <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 border-l-4 ${data.reply ? 'border-l-green-500' : 'border-l-gray-300'} hover:shadow-md transition-shadow">
+                        <div class="flex justify-between items-start mb-4">
                             <div>
-                                <span class="text-xs font-bold text-gray-500 bg-gray-100 px-2 py-1 rounded">REF: ${data.listingSerial}</span>
-                                <h4 class="font-bold text-lg text-gray-900 mt-2">${data.listingTitle}</h4>
+                                <span class="text-xs font-bold text-gray-600 bg-gray-100 px-2.5 py-1 rounded-md border border-gray-200">REF: ${data.listingSerial}</span>
+                                <h4 class="font-bold text-xl text-gray-900 mt-3">${data.listingTitle}</h4>
                             </div>
-                            <span class="text-xs font-bold px-3 py-1 rounded-full ${data.reply ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-600'}">${data.reply ? 'Replied' : 'Pending'}</span>
+                            <span class="text-xs font-bold px-3 py-1.5 rounded-full ${data.reply ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-600'}">${data.reply ? '<i class="fa-solid fa-check-double mr-1"></i> Developer Replied' : 'Pending Reply'}</span>
                         </div>
-                        <div class="bg-gray-50 p-3 rounded-lg border border-gray-100 mb-3">
-                            <p class="text-sm text-gray-700"><span class="font-semibold text-gray-500 mr-2">You asked:</span> "${data.text}"</p>
+                        <div class="bg-gray-50 p-4 rounded-xl border border-gray-100 mb-3">
+                            <p class="text-sm text-gray-800"><span class="font-bold text-gray-500 uppercase tracking-wider text-xs block mb-1">You asked:</span> "${data.text}"</p>
                         </div>
                         
                         ${data.reply ? `
-                            <div class="bg-blue-50 p-4 rounded-lg border border-blue-100">
-                                <p class="text-sm font-semibold text-blue-800 mb-1"><i class="fa-solid fa-reply mr-1"></i> Developer Response:</p>
+                            <div class="bg-blue-50/50 p-5 rounded-xl border border-blue-100 relative">
+                                <div class="absolute top-0 left-5 transform -translate-y-1/2 w-4 h-4 bg-blue-50 border-t border-l border-blue-100 rotate-45"></div>
+                                <p class="text-xs font-bold uppercase tracking-wider text-blue-800 mb-1"><i class="fa-solid fa-reply mr-1"></i> Developer Response:</p>
                                 <p class="text-sm text-blue-900">${data.reply}</p>
                             </div>
                         ` : ''}
                     </div>
                 `;
             });
-
-            const badge = document.getElementById('notif-badge');
-            if (badge) badge.classList.toggle('hidden', !hasNewReplies);
-
         } catch (err) {
             list.innerHTML = '<p class="text-red-500">Failed to load updates.</p>';
         }
