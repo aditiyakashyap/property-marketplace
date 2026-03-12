@@ -6,9 +6,7 @@ class BuyerApp {
         this.user = null;
         this.allListings = [];
         this.selectedListing = null;
-
         this.initAuth();
-        document.getElementById('login-btn').addEventListener('click', () => this.login());
     }
 
     initAuth() {
@@ -16,7 +14,6 @@ class BuyerApp {
             if (user) {
                 this.user = user;
                 
-                // NEW: Populate Welcome Banner Name
                 const welcomeName = document.getElementById('buyer-welcome-name');
                 if(welcomeName) welcomeName.innerText = user.displayName.split(' ')[0];
 
@@ -29,10 +26,17 @@ class BuyerApp {
                         </div>
                         <button onclick="buyerApp.logout()" class="text-gray-400 hover:text-red-500 transition-colors bg-white border border-gray-200 w-10 h-10 rounded-full flex items-center justify-center shadow-sm" title="Logout"><i class="fa-solid fa-arrow-right-from-bracket"></i></button>
                     </div>`;
+                
+                // Show App, Hide Landing
+                document.getElementById('landing-page').classList.add('hidden');
                 document.getElementById('main-app').classList.remove('hidden');
+                
                 this.fetchAndFilterListings();
                 this.loadMyInterests();
             } else {
+                // Show Landing, Hide App
+                document.getElementById('auth-section').innerHTML = `<button onclick="buyerApp.login()" class="bg-gray-900 text-white px-5 py-2 rounded-lg hover:bg-black font-medium transition-all shadow-md">Login</button>`;
+                document.getElementById('landing-page').classList.remove('hidden');
                 document.getElementById('main-app').classList.add('hidden');
             }
         });
@@ -52,7 +56,6 @@ class BuyerApp {
         document.getElementById('section-home').classList.toggle('hidden', tab !== 'home');
         document.getElementById('section-interests').classList.toggle('hidden', tab !== 'interests');
         
-        // Stylish tab switching
         document.getElementById('tab-home').className = tab === 'home' ? 'font-bold text-lg text-blue-600 border-b-2 border-blue-600 pb-4 -mb-[18px] transition-all' : 'font-bold text-lg text-gray-400 hover:text-gray-700 pb-4 -mb-[18px] transition-all';
         document.getElementById('tab-interests').className = tab === 'interests' ? 'font-bold text-lg text-blue-600 border-b-2 border-blue-600 pb-4 -mb-[18px] transition-all relative' : 'font-bold text-lg text-gray-400 hover:text-gray-700 pb-4 -mb-[18px] transition-all relative';
         
@@ -177,7 +180,6 @@ class BuyerApp {
             const snapshot = await getDocs(q);
             list.innerHTML = '';
             
-            // NEW: Update Dashboard Stats
             let repliedCount = 0;
             snapshot.forEach(docSnap => { if(docSnap.data().reply) repliedCount++; });
             
