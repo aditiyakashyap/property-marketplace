@@ -146,10 +146,14 @@ class BuyerApp {
         const keyword = document.getElementById('search-keyword').value.toLowerCase().trim();
         const type = document.getElementById('search-type').value;
         
-        // New Advanced Filter Values
+        // Advanced Filters
         const filterBhk = document.getElementById('filter-bhk')?.value.toLowerCase() || '';
         const filterStatus = document.getElementById('filter-status')?.value.toLowerCase() || '';
         const filterFurnishing = document.getElementById('filter-furnishing')?.value.toLowerCase() || '';
+        
+        // Budget Filter (1 Cr = 10,000,000)
+        const budgetSliderValue = parseFloat(document.getElementById('filter-budget')?.value || '10');
+        const maxBudgetRupees = budgetSliderValue * 10000000;
 
         const filtered = this.allListings.filter(l => {
             const title = (l.title || '').toLowerCase();
@@ -157,6 +161,7 @@ class BuyerApp {
             const sellerName = (l.sellerName || '').toLowerCase();
             const serialNum = (l.serialNum || '').toLowerCase();
             const desc = (l.description || '').toLowerCase();
+            const propPrice = Number(l.price || 0);
 
             // Check base keyword & type
             const matchKeyword = !keyword ||
@@ -167,11 +172,10 @@ class BuyerApp {
             
             const matchType = !type || l.type === type;
 
-            // Check advanced filters (Looks for the term in the Title or Description)
-            // If the user hasn't selected a filter, it returns true by default.
+            // Check Advanced Dropdowns
             const matchBhk = !filterBhk || title.includes(filterBhk) || desc.includes(filterBhk);
+            const matchFurnishing = !filterFurnishing || title.includes(filterFurnishing) || desc.includes(filterFurnishing);
             
-            // "New Launch / Pre-Launch" logic helper
             let matchStatus = true;
             if (filterStatus) {
                 if (filterStatus.includes('new launch')) {
@@ -181,9 +185,10 @@ class BuyerApp {
                 }
             }
 
-            const matchFurnishing = !filterFurnishing || title.includes(filterFurnishing) || desc.includes(filterFurnishing);
+            // Check Budget (If slider is at 10, treat it as 10+ Cr / unlimited)
+            const matchBudget = budgetSliderValue === 10 ? true : (propPrice <= maxBudgetRupees);
 
-            return matchKeyword && matchType && matchBhk && matchStatus && matchFurnishing;
+            return matchKeyword && matchType && matchBhk && matchStatus && matchFurnishing && matchBudget;
         });
 
         // Results header
@@ -194,6 +199,7 @@ class BuyerApp {
             if (filterBhk) filterText.push(`<strong>${document.getElementById('filter-bhk').value}</strong>`);
             if (filterStatus) filterText.push(`<strong>${document.getElementById('filter-status').value}</strong>`);
             if (filterFurnishing) filterText.push(`<strong>${document.getElementById('filter-furnishing').value}</strong>`);
+            if (budgetSliderValue < 10) filterText.push(`Under <strong>₹${budgetSliderValue} Cr</strong>`);
 
             resultsHeader.innerHTML = filtered.length > 0
                 ? `Showing <strong>${filtered.length}</strong> propert${filtered.length === 1 ? 'y' : 'ies'}${filterText.length > 0 ? ` for ` + filterText.join(' · ') : ''}`
