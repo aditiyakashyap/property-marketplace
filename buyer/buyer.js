@@ -111,6 +111,13 @@ class BuyerApp {
         if (tab === 'interests') this.loadMyInterests();
     }
 
+    toggleFilters() {
+        const panel = document.getElementById('pw-advanced-filters');
+        if(panel) {
+            panel.classList.toggle('hidden');
+        }
+    }
+
     async fetchAndFilterListings() {
         const grid = document.getElementById('market-grid');
         const resultsHeader = document.getElementById('results-header');
@@ -138,28 +145,58 @@ class BuyerApp {
 
         const keyword = document.getElementById('search-keyword').value.toLowerCase().trim();
         const type = document.getElementById('search-type').value;
+        
+        // New Advanced Filter Values
+        const filterBhk = document.getElementById('filter-bhk')?.value.toLowerCase() || '';
+        const filterStatus = document.getElementById('filter-status')?.value.toLowerCase() || '';
+        const filterFurnishing = document.getElementById('filter-furnishing')?.value.toLowerCase() || '';
 
-        // FIXED: Replaced unsafe direct object accessing with fallbacks
         const filtered = this.allListings.filter(l => {
-            const title = l.title || '';
-            const location = l.location || '';
-            const sellerName = l.sellerName || '';
-            const serialNum = l.serialNum || '';
+            const title = (l.title || '').toLowerCase();
+            const location = (l.location || '').toLowerCase();
+            const sellerName = (l.sellerName || '').toLowerCase();
+            const serialNum = (l.serialNum || '').toLowerCase();
+            const desc = (l.description || '').toLowerCase();
 
+            // Check base keyword & type
             const matchKeyword = !keyword ||
-                title.toLowerCase().includes(keyword) ||
-                location.toLowerCase().includes(keyword) ||
-                sellerName.toLowerCase().includes(keyword) ||
-                serialNum.toLowerCase().includes(keyword);
+                title.includes(keyword) ||
+                location.includes(keyword) ||
+                sellerName.includes(keyword) ||
+                serialNum.includes(keyword);
             
             const matchType = !type || l.type === type;
-            return matchKeyword && matchType;
+
+            // Check advanced filters (Looks for the term in the Title or Description)
+            // If the user hasn't selected a filter, it returns true by default.
+            const matchBhk = !filterBhk || title.includes(filterBhk) || desc.includes(filterBhk);
+            
+            // "New Launch / Pre-Launch" logic helper
+            let matchStatus = true;
+            if (filterStatus) {
+                if (filterStatus.includes('new launch')) {
+                    matchStatus = title.includes('new launch') || desc.includes('new launch') || title.includes('pre-launch') || desc.includes('pre-launch');
+                } else {
+                    matchStatus = title.includes(filterStatus) || desc.includes(filterStatus);
+                }
+            }
+
+            const matchFurnishing = !filterFurnishing || title.includes(filterFurnishing) || desc.includes(filterFurnishing);
+
+            return matchKeyword && matchType && matchBhk && matchStatus && matchFurnishing;
         });
 
         // Results header
         if (resultsHeader) {
+            let filterText = [];
+            if (keyword) filterText.push(`"<strong>${keyword}</strong>"`);
+            if (type) filterText.push(`Type: <strong>${type}</strong>`);
+            if (filterBhk) filterText.push(`<strong>${document.getElementById('filter-bhk').value}</strong>`);
+            if (filterStatus) filterText.push(`<strong>${document.getElementById('filter-status').value}</strong>`);
+            if (filterFurnishing) filterText.push(`<strong>${document.getElementById('filter-furnishing').value}</strong>`);
+
             resultsHeader.innerHTML = filtered.length > 0
-                ? `Showing <strong>${filtered.length}</strong> propert${filtered.length === 1 ? 'y' : 'ies'}${keyword ? ` for "<strong>${keyword}</strong>"` : ''}${type ? ` · Type: <strong>${type}</strong>` : ''}`
+                ? `Showing <strong>${filtered.length}</strong> propert${filtered.length === 1 ? 'y' : 'ies'}${filterText.length > 0 ? ` for ` + filterText.join(' · ') : ''}`
                 : '';
         }
 
