@@ -22,7 +22,7 @@ class SellerApp {
                             <img src="${user.photoURL}" class="w-6 h-6 rounded-full" onerror="this.style.display='none'">
                             <span class="text-gray-700 font-medium text-sm">${user.displayName}</span>
                         </div>
-                        <button onclick="sellerApp.logout()" class="text-gray-400 hover:text-red-500 transition-colors bg-white border border-gray-200 w-10 h-10 rounded-full flex items-center justify-center shadow-sm" title="Logout"><i class="fa-solid fa-arrow-right-from-bracket"></i></button>
+                        <button onclick="window.sellerApp && window.sellerApp.logout()" class="text-gray-400 hover:text-red-500 transition-colors bg-white border border-gray-200 w-10 h-10 rounded-full flex items-center justify-center shadow-sm" title="Logout"><i class="fa-solid fa-arrow-right-from-bracket"></i></button>
                     </div>`;
                 
                 // Show App, Hide Landing
@@ -33,7 +33,7 @@ class SellerApp {
                 this.loadQueries();
             } else {
                 // Show Landing, Hide App
-                document.getElementById('auth-section').innerHTML = `<button onclick="sellerApp.login()" class="bg-blue-600 text-white px-5 py-2 rounded-lg hover:bg-blue-700 font-medium transition-all shadow-md">Developer Login</button>`;
+                document.getElementById('auth-section').innerHTML = `<button onclick="window.sellerApp && window.sellerApp.login()" class="bg-blue-600 text-white px-5 py-2 rounded-lg hover:bg-blue-700 font-medium transition-all shadow-md">Developer Login</button>`;
                 document.getElementById('landing-page').classList.remove('hidden');
                 document.getElementById('dashboard').classList.add('hidden');
             }
@@ -100,7 +100,6 @@ class SellerApp {
         try {
             const q = query(collection(db, "listings"), where("sellerId", "==", this.user.uid));
             const snapshot = await getDocs(q);
-            grid.innerHTML = '';
             
             const statListings = document.getElementById('stat-listings');
             if(statListings) statListings.innerText = snapshot.size;
@@ -117,9 +116,10 @@ class SellerApp {
                 return;
             }
 
+            let htmlString = '';
             snapshot.forEach(docSnap => {
                 const data = docSnap.data();
-                grid.innerHTML += `
+                htmlString += `
                     <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden flex flex-col property-card group">
                         <div class="relative h-48 bg-gray-200 overflow-hidden">
                             <img src="${data.imageUrl}" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500">
@@ -132,13 +132,14 @@ class SellerApp {
                             
                             <div class="mt-auto border-t border-gray-100 pt-4 flex justify-between items-center">
                                 <p class="text-gray-900 font-bold text-xl">₹${data.price.toLocaleString('en-IN')}</p>
-                                <button onclick="sellerApp.deleteListing('${docSnap.id}')" class="text-red-500 text-sm hover:bg-red-50 px-3 py-1.5 rounded-lg transition-colors font-medium flex items-center">
+                                <button onclick="window.sellerApp && window.sellerApp.deleteListing('${docSnap.id}')" class="text-red-500 text-sm hover:bg-red-50 px-3 py-1.5 rounded-lg transition-colors font-medium flex items-center">
                                     <i class="fa-solid fa-trash mr-1.5"></i> Remove
                                 </button>
                             </div>
                         </div>
                     </div>`;
             });
+            grid.innerHTML = htmlString;
         } catch (err) { grid.innerHTML = '<p class="text-red-500">Failed to load listings.</p>'; }
     }
 
@@ -156,7 +157,6 @@ class SellerApp {
         try {
             const q = query(collection(db, "queries"), where("sellerId", "==", this.user.uid));
             const snapshot = await getDocs(q);
-            list.innerHTML = '';
 
             let pendingCount = 0;
             snapshot.forEach(docSnap => { if(!docSnap.data().reply) pendingCount++; });
@@ -178,11 +178,13 @@ class SellerApp {
                 return;
             }
 
+            let htmlString = '';
             snapshot.forEach(docSnap => {
                 const data = docSnap.data();
-                const maskedBuyerId = "Buyer-" + data.buyerId.substring(0, 5).toUpperCase();
+                const safeBuyerId = data.buyerId ? data.buyerId.substring(0, 5).toUpperCase() : 'UNKNOWN';
+                const maskedBuyerId = "Buyer-" + safeBuyerId;
                 
-                list.innerHTML += `
+                htmlString += `
                     <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 border-l-4 ${data.reply ? 'border-l-green-500' : 'border-l-yellow-400'} hover:shadow-md transition-shadow">
                         <div class="flex justify-between items-start mb-4">
                             <div>
@@ -202,12 +204,13 @@ class SellerApp {
                                </div>` 
                             : `<div class="flex flex-col sm:flex-row gap-3">
                                  <input type="text" id="reply-${docSnap.id}" placeholder="Type your professional response..." class="bg-white border border-gray-300 p-3 rounded-xl flex-grow outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100 transition-all text-sm shadow-sm">
-                                 <button onclick="sellerApp.sendReply('${docSnap.id}')" id="btn-${docSnap.id}" class="bg-gray-900 text-white px-6 py-3 rounded-xl text-sm font-medium hover:bg-black transition-colors whitespace-nowrap shadow-md">Send Reply</button>
+                                 <button onclick="window.sellerApp && window.sellerApp.sendReply('${docSnap.id}')" id="btn-${docSnap.id}" class="bg-gray-900 text-white px-6 py-3 rounded-xl text-sm font-medium hover:bg-black transition-colors whitespace-nowrap shadow-md">Send Reply</button>
                                </div>`
                         }
                     </div>
                 `;
             });
+            list.innerHTML = htmlString;
         } catch(err) { list.innerHTML = '<p class="text-red-500">Failed to load queries.</p>'; }
     }
 
