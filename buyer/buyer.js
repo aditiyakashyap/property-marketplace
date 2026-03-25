@@ -1,5 +1,5 @@
 // File: buyer/buyer.js
-// PropWale Buyer App — CarWale-inspired UI
+// PropMatch Buyer App — CarWale-inspired UI
 import { auth, db, googleProvider, signInWithPopup, signOut, onAuthStateChanged, collection, addDoc, getDocs, query, where, serverTimestamp } from '../firebase-config.js';
 
 class BuyerApp {
