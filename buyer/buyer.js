@@ -39,7 +39,7 @@ class BuyerApp {
         // Replace login button with user widget
         document.getElementById('auth-section').innerHTML = `
             <div class="pw-user-widget">
-                <button onclick="buyerApp.switchTab('interests')" style="
+                <button onclick="window.buyerApp && window.buyerApp.switchTab('interests')" style="
                     width:36px;height:36px;border-radius:50%;background:var(--brand-light);
                     color:var(--brand);border:1px solid rgba(14,110,158,.2);
                     display:flex;align-items:center;justify-content:center;font-size:14px;
@@ -55,7 +55,7 @@ class BuyerApp {
                     }
                     <span style="font-size:13px;font-weight:600;color:var(--gray-700);">${user.displayName.split(' ')[0]}</span>
                 </div>
-                <button onclick="buyerApp.logout()" title="Logout" style="
+                <button onclick="window.buyerApp && window.buyerApp.logout()" title="Logout" style="
                     width:36px;height:36px;border-radius:50%;
                     background:#fff;border:1px solid var(--border);
                     display:flex;align-items:center;justify-content:center;
@@ -74,7 +74,7 @@ class BuyerApp {
 
     _showLanding() {
         document.getElementById('auth-section').innerHTML = `
-            <button onclick="buyerApp.login()" class="pw-login-btn">
+            <button onclick="window.buyerApp && window.buyerApp.login()" class="pw-login-btn">
                 <i class="fa-solid fa-user"></i><span> Login / Register</span>
             </button>`;
         document.getElementById('landing-page').classList.remove('hidden');
@@ -139,12 +139,19 @@ class BuyerApp {
         const keyword = document.getElementById('search-keyword').value.toLowerCase().trim();
         const type = document.getElementById('search-type').value;
 
+        // FIXED: Replaced unsafe direct object accessing with fallbacks
         const filtered = this.allListings.filter(l => {
+            const title = l.title || '';
+            const location = l.location || '';
+            const sellerName = l.sellerName || '';
+            const serialNum = l.serialNum || '';
+
             const matchKeyword = !keyword ||
-                l.title.toLowerCase().includes(keyword) ||
-                l.location.toLowerCase().includes(keyword) ||
-                l.sellerName.toLowerCase().includes(keyword) ||
-                l.serialNum.toLowerCase().includes(keyword);
+                title.toLowerCase().includes(keyword) ||
+                location.toLowerCase().includes(keyword) ||
+                sellerName.toLowerCase().includes(keyword) ||
+                serialNum.toLowerCase().includes(keyword);
+            
             const matchType = !type || l.type === type;
             return matchKeyword && matchType;
         });
@@ -172,42 +179,43 @@ class BuyerApp {
             return;
         }
 
-        grid.innerHTML = '';
+        let gridHtml = '';
         listings.forEach(data => {
             const price = Number(data.price).toLocaleString('en-IN');
             const imgSrc = data.imageUrl || 'https://images.unsplash.com/photo-1560518883-ce09059eeffa?w=600&q=80';
 
-            const card = document.createElement('div');
-            card.className = 'pw-card';
-            card.innerHTML = `
-                <div class="pw-card-img-wrap">
-                    <img src="${imgSrc}"
-                         alt="${data.title}"
-                         onerror="this.src='https://images.unsplash.com/photo-1560518883-ce09059eeffa?w=600&q=80'">
-                    <div class="pw-card-id">ID: ${data.serialNum}</div>
-                    <div class="pw-card-type-badge">${data.type}</div>
-                </div>
-                <div class="pw-card-body">
-                    <h3 class="pw-card-title">${data.title}</h3>
-                    <p class="pw-card-loc">
-                        <i class="fa-solid fa-location-dot"></i>
-                        ${data.location}
-                    </p>
-                    <p class="pw-card-seller">
-                        <i class="fa-solid fa-user-tie"></i>
-                        Listed by ${data.sellerName}
-                    </p>
-                    <div class="pw-card-footer">
-                        <div class="pw-card-price">₹${price}</div>
-                        <div class="pw-card-cta">
-                            <button onclick="buyerApp.openQueryModal('${data.id}')" class="pw-card-ask-btn">
-                                Express Interest <i class="fa-solid fa-arrow-right"></i>
-                            </button>
+            gridHtml += `
+                <div class="pw-card">
+                    <div class="pw-card-img-wrap">
+                        <img src="${imgSrc}"
+                             alt="${data.title}"
+                             onerror="this.src='https://images.unsplash.com/photo-1560518883-ce09059eeffa?w=600&q=80'">
+                        <div class="pw-card-id">ID: ${data.serialNum}</div>
+                        <div class="pw-card-type-badge">${data.type}</div>
+                    </div>
+                    <div class="pw-card-body">
+                        <h3 class="pw-card-title">${data.title}</h3>
+                        <p class="pw-card-loc">
+                            <i class="fa-solid fa-location-dot"></i>
+                            ${data.location}
+                        </p>
+                        <p class="pw-card-seller">
+                            <i class="fa-solid fa-user-tie"></i>
+                            Listed by ${data.sellerName}
+                        </p>
+                        <div class="pw-card-footer">
+                            <div class="pw-card-price">₹${price}</div>
+                            <div class="pw-card-cta">
+                                <button onclick="window.buyerApp && window.buyerApp.openQueryModal('${data.id}')" class="pw-card-ask-btn">
+                                    Express Interest <i class="fa-solid fa-arrow-right"></i>
+                                </button>
+                            </div>
                         </div>
                     </div>
                 </div>`;
-            grid.appendChild(card);
         });
+        
+        grid.innerHTML = gridHtml;
     }
 
     openQueryModal(listingId) {
@@ -296,32 +304,33 @@ class BuyerApp {
                 return;
             }
 
+            let htmlString = '';
             items.forEach(data => {
-                const card = document.createElement('div');
-                card.className = `pw-query-card ${data.reply ? 'pw-qc-replied' : ''}`;
-                card.innerHTML = `
-                    <div class="pw-qc-head">
-                        <div>
-                            <span class="pw-qc-ref">REF: ${data.listingSerial}</span>
-                            <h4 class="pw-qc-title">${data.listingTitle}</h4>
+                htmlString += `
+                    <div class="pw-query-card ${data.reply ? 'pw-qc-replied' : ''}">
+                        <div class="pw-qc-head">
+                            <div>
+                                <span class="pw-qc-ref">REF: ${data.listingSerial}</span>
+                                <h4 class="pw-qc-title">${data.listingTitle}</h4>
+                            </div>
+                            <span class="pw-qc-status ${data.reply ? 'replied' : 'pending'}">
+                                ${data.reply
+                                    ? '<i class="fa-solid fa-check-double"></i> Developer Replied'
+                                    : '<i class="fa-regular fa-clock"></i> Awaiting Reply'}
+                            </span>
                         </div>
-                        <span class="pw-qc-status ${data.reply ? 'replied' : 'pending'}">
-                            ${data.reply
-                                ? '<i class="fa-solid fa-check-double"></i> Developer Replied'
-                                : '<i class="fa-regular fa-clock"></i> Awaiting Reply'}
-                        </span>
-                    </div>
-                    <div class="pw-qc-question">
-                        <div class="pw-qc-qlabel">Your inquiry</div>
-                        <p>"${data.text}"</p>
-                    </div>
-                    ${data.reply ? `
-                        <div class="pw-qc-reply" style="margin-top:10px;">
-                            <div class="pw-qc-rlabel"><i class="fa-solid fa-reply"></i> Developer Response</div>
-                            <p>${data.reply}</p>
-                        </div>` : ''}`;
-                list.appendChild(card);
+                        <div class="pw-qc-question">
+                            <div class="pw-qc-qlabel">Your inquiry</div>
+                            <p>"${data.text}"</p>
+                        </div>
+                        ${data.reply ? `
+                            <div class="pw-qc-reply" style="margin-top:10px;">
+                                <div class="pw-qc-rlabel"><i class="fa-solid fa-reply"></i> Developer Response</div>
+                                <p>${data.reply}</p>
+                            </div>` : ''}
+                    </div>`;
             });
+            list.innerHTML = htmlString;
 
         } catch (err) {
             console.error(err);
