@@ -302,10 +302,10 @@
             <div class="pw-app-search">
                 <div class="pw-as-field pw-as-main">
                     <i class="fa-solid fa-magnifying-glass"></i>
-                    <input type="text" id="search-keyword" placeholder="Area, location, developer or title…" />
+                    <input type="text" id="search-keyword" placeholder="Search by area, project, or developer (Optional)…" onkeyup="event.key === 'Enter' && window.buyerApp && window.buyerApp.fetchAndFilterListings()" />
                 </div>
                 <div class="pw-as-field pw-as-type">
-                    <select id="search-type">
+                    <select id="search-type" onchange="window.buyerApp && window.buyerApp.fetchAndFilterListings()">
                         <option value="">All Types</option>
                         <option value="Apartment">Apartment</option>
                         <option value="Commercial">Commercial</option>
@@ -325,7 +325,7 @@
             <div id="pw-advanced-filters" class="hidden" style="margin-bottom: 24px; padding: 20px; background: #f9fafb; border: 1px solid #e5e7eb; border-radius: 12px; display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 16px; box-shadow: inset 0 2px 4px rgba(0,0,0,0.02);">
                 <div>
                     <label style="font-size: 11px; font-weight: 700; color: #6b7280; text-transform: uppercase; letter-spacing: 0.05em;">BHK / Config</label>
-                    <select id="filter-bhk" style="width: 100%; padding: 10px 14px; border: 1px solid #d1d5db; border-radius: 8px; font-size: 14px; margin-top: 6px; outline: none; background: white; color: #374151;">
+                    <select id="filter-bhk" onchange="window.buyerApp && window.buyerApp.fetchAndFilterListings()" style="width: 100%; padding: 10px 14px; border: 1px solid #d1d5db; border-radius: 8px; font-size: 14px; margin-top: 6px; outline: none; background: white; color: #374151;">
                         <option value="">Any</option>
                         <option value="1 RK">1 RK</option>
                         <option value="1 BHK">1 BHK</option>
@@ -338,7 +338,7 @@
                 </div>
                 <div>
                     <label style="font-size: 11px; font-weight: 700; color: #6b7280; text-transform: uppercase; letter-spacing: 0.05em;">Project Status</label>
-                    <select id="filter-status" style="width: 100%; padding: 10px 14px; border: 1px solid #d1d5db; border-radius: 8px; font-size: 14px; margin-top: 6px; outline: none; background: white; color: #374151;">
+                    <select id="filter-status" onchange="window.buyerApp && window.buyerApp.fetchAndFilterListings()" style="width: 100%; padding: 10px 14px; border: 1px solid #d1d5db; border-radius: 8px; font-size: 14px; margin-top: 6px; outline: none; background: white; color: #374151;">
                         <option value="">Any</option>
                         <option value="Ready to Move">Ready to Move</option>
                         <option value="Under Construction">Under Construction</option>
@@ -347,7 +347,7 @@
                 </div>
                 <div>
                     <label style="font-size: 11px; font-weight: 700; color: #6b7280; text-transform: uppercase; letter-spacing: 0.05em;">Furnishing</label>
-                    <select id="filter-furnishing" style="width: 100%; padding: 10px 14px; border: 1px solid #d1d5db; border-radius: 8px; font-size: 14px; margin-top: 6px; outline: none; background: white; color: #374151;">
+                    <select id="filter-furnishing" onchange="window.buyerApp && window.buyerApp.fetchAndFilterListings()" style="width: 100%; padding: 10px 14px; border: 1px solid #d1d5db; border-radius: 8px; font-size: 14px; margin-top: 6px; outline: none; background: white; color: #374151;">
                         <option value="">Any</option>
                         <option value="Unfurnished">Unfurnished</option>
                         <option value="Semi-furnished">Semi-furnished</option>
@@ -355,7 +355,7 @@
                     </select>
                 </div>
                 <div style="display: flex; align-items: flex-end;">
-                     <button onclick="window.buyerApp && window.buyerApp.fetchAndFilterListings()" style="width: 100%; background: #e8f4fb; color: #0e6e9e; padding: 11px; border: 1px solid rgba(14,110,158,0.2); border-radius: 8px; font-weight: 700; font-size: 13px; transition: all 0.2s;" onmouseover="this.style.background='#0e6e9e'; this.style.color='white'" onmouseout="this.style.background='#e8f4fb'; this.style.color='#0e6e9e'">Apply Filters</button>
+                     <button onclick="document.getElementById('search-keyword').value=''; document.getElementById('search-type').value=''; document.getElementById('filter-bhk').value=''; document.getElementById('filter-status').value=''; document.getElementById('filter-furnishing').value=''; window.buyerApp && window.buyerApp.fetchAndFilterListings();" style="width: 100%; background: #fee2e2; color: #b91c1c; padding: 11px; border: 1px solid rgba(185,28,28,0.2); border-radius: 8px; font-weight: 700; font-size: 13px; transition: all 0.2s;" onmouseover="this.style.background='#b91c1c'; this.style.color='white'" onmouseout="this.style.background='#fee2e2'; this.style.color='#b91c1c'">Clear All Filters</button>
                 </div>
             </div>
 
