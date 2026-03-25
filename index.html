@@ -3,38 +3,403 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>PropMatch | Welcome</title>
+    <title>PropWale – Find Your Right Property</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="styles.css">
+    <link href="https://fonts.googleapis.com/css2?family=Sora:wght@300;400;500;600;700;800&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="../styles.css">
+    <link rel="stylesheet" href="buyer.css">
 </head>
-<body class="bg-gray-50 flex items-center justify-center min-h-screen">
+<body>
 
-    <div class="text-center max-w-2xl px-4 animate-fade-in-up">
-        <div class="mb-8">
-            <i class="fa-solid fa-building-user text-blue-600 text-6xl mb-4"></i>
-            <h1 class="font-bold text-5xl tracking-tight text-gray-900 mb-2">Prop<span class="text-blue-600">Match</span></h1>
-            <p class="text-gray-500 text-lg">Select your portal to continue</p>
+<!-- ═══════════════════════ STICKY HEADER ═══════════════════════ -->
+<header class="pw-header" id="pw-header">
+    <div class="pw-header-inner">
+        <div class="pw-logo-wrap">
+            <a href="../" class="pw-back-arrow" title="Go back"><i class="fa-solid fa-arrow-left"></i></a>
+            <div class="pw-logo" onclick="buyerApp && buyerApp.switchTab('home')">Prop<span>Wale</span></div>
         </div>
+        <nav class="pw-nav" id="desktop-nav">
+            <a href="#" class="pw-nav-link pw-nav-active" onclick="buyerApp && buyerApp.switchTab('home'); return false;">BUY</a>
+            <a href="#" class="pw-nav-link" onclick="buyerApp && buyerApp.switchTab('interests'); return false;">MY INTERESTS</a>
+            <a href="#" class="pw-nav-link">RENT</a>
+            <a href="#" class="pw-nav-link">NEW PROJECTS</a>
+        </nav>
+        <div id="auth-section" class="pw-auth">
+            <button onclick="buyerApp && buyerApp.login()" class="pw-login-btn">
+                <i class="fa-solid fa-user"></i><span> Login / Register</span>
+            </button>
+        </div>
+    </div>
+</header>
 
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <a href="./buyer/" class="bg-white p-8 rounded-2xl shadow-sm border border-gray-100 hover:shadow-lg transition-all hover:-translate-y-1 group block">
-                <div class="bg-blue-50 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4 group-hover:bg-blue-600 transition-colors">
-                    <i class="fa-solid fa-magnifying-glass text-blue-600 text-2xl group-hover:text-white transition-colors"></i>
-                </div>
-                <h2 class="text-2xl font-bold text-gray-900 mb-2">I am a Buyer</h2>
-                <p class="text-gray-500 text-sm">Search properties, express interest, and contact developers securely.</p>
-            </a>
 
-            <a href="./seller/" class="bg-white p-8 rounded-2xl shadow-sm border border-gray-100 hover:shadow-lg transition-all hover:-translate-y-1 group block">
-                <div class="bg-green-50 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4 group-hover:bg-green-600 transition-colors">
-                    <i class="fa-solid fa-tags text-green-600 text-2xl group-hover:text-white transition-colors"></i>
+<!-- ═══════════════════════ LANDING PAGE ═══════════════════════ -->
+<div id="landing-page" class="hidden">
+
+    <!-- HERO -->
+    <section class="pw-hero">
+        <div class="pw-hero-overlay"></div>
+        <div class="pw-hero-content">
+            <h1 class="pw-hero-title">Find Your Right Property</h1>
+            <p class="pw-hero-sub">Search from thousands of verified listings across India</p>
+
+            <div class="pw-search-tabs">
+                <button class="pw-stab pw-stab-active">Buy</button>
+                <button class="pw-stab">Rent</button>
+                <button class="pw-stab">New Projects</button>
+                <button class="pw-stab">Commercial</button>
+            </div>
+
+            <div class="pw-search-box">
+                <div class="pw-search-city">
+                    <i class="fa-solid fa-location-dot"></i>
+                    <select class="pw-city-select">
+                        <option>Select City</option>
+                        <option>Mumbai</option>
+                        <option>Delhi NCR</option>
+                        <option>Bangalore</option>
+                        <option>Pune</option>
+                        <option>Hyderabad</option>
+                        <option>Chennai</option>
+                    </select>
                 </div>
-                <h2 class="text-2xl font-bold text-gray-900 mb-2">I am a Seller</h2>
-                <p class="text-gray-500 text-sm">List projects, manage your portfolio, and respond to buyer queries.</p>
-            </a>
+                <div class="pw-sdivider"></div>
+                <div class="pw-search-input-wrap">
+                    <i class="fa-solid fa-magnifying-glass"></i>
+                    <input type="text" placeholder="Type area, project name or developer…" class="pw-sinput" />
+                </div>
+                <button class="pw-search-btn" onclick="buyerApp && buyerApp.login()">Search</button>
+            </div>
+
+            <div class="pw-quick-filters">
+                <span class="pw-qf-label">Popular:</span>
+                <button class="pw-qf-pill" onclick="buyerApp && buyerApp.login()">Apartment</button>
+                <button class="pw-qf-pill" onclick="buyerApp && buyerApp.login()">Villa</button>
+                <button class="pw-qf-pill" onclick="buyerApp && buyerApp.login()">Plot / Land</button>
+                <button class="pw-qf-pill" onclick="buyerApp && buyerApp.login()">Commercial</button>
+                <button class="pw-qf-pill" onclick="buyerApp && buyerApp.login()">2 BHK</button>
+                <button class="pw-qf-pill" onclick="buyerApp && buyerApp.login()">3 BHK</button>
+            </div>
+        </div>
+    </section>
+
+    <!-- PROPERTIES BY BUDGET -->
+    <section class="pw-section">
+        <div class="pw-section-inner">
+            <div class="pw-section-head">
+                <h2 class="pw-section-title">Properties by Budget</h2>
+            </div>
+            <div class="pw-budget-tabs">
+                <button class="pw-btab pw-btab-active">Under ₹50 Lakh</button>
+                <button class="pw-btab">₹50L – ₹1 Cr</button>
+                <button class="pw-btab">₹1 Cr – ₹2 Cr</button>
+                <button class="pw-btab">₹2 Cr+</button>
+            </div>
+            <div class="pw-budget-subtabs">
+                <button class="pw-bsubtab pw-bsubtab-active">Apartment</button>
+                <button class="pw-bsubtab">Villa</button>
+                <button class="pw-bsubtab">Plot / Land</button>
+                <button class="pw-bsubtab">Commercial</button>
+            </div>
+            <div class="pw-budget-grid">
+                <div class="pw-bc" onclick="buyerApp && buyerApp.login()">
+                    <div class="pw-bc-img"><img src="https://images.unsplash.com/photo-1580587771525-78b9dba3b914?w=400&q=80" alt=""><span class="pw-bc-badge">FEATURED</span></div>
+                    <div class="pw-bc-body"><p class="pw-bc-type">Apartment</p><h4>Sunrise Heights</h4><p class="pw-bc-loc"><i class="fa-solid fa-location-dot"></i> Andheri West, Mumbai</p><p class="pw-bc-price">₹45 – ₹55 Lakh</p><span class="pw-bc-link">View Price Details</span></div>
+                </div>
+                <div class="pw-bc" onclick="buyerApp && buyerApp.login()">
+                    <div class="pw-bc-img"><img src="https://images.unsplash.com/photo-1512917774080-9991f1c4c750?w=400&q=80" alt=""></div>
+                    <div class="pw-bc-body"><p class="pw-bc-type">Villa</p><h4>Green Meadows</h4><p class="pw-bc-loc"><i class="fa-solid fa-location-dot"></i> Whitefield, Bangalore</p><p class="pw-bc-price">₹38 – ₹49 Lakh</p><span class="pw-bc-link">View Price Details</span></div>
+                </div>
+                <div class="pw-bc" onclick="buyerApp && buyerApp.login()">
+                    <div class="pw-bc-img"><img src="https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?w=400&q=80" alt=""></div>
+                    <div class="pw-bc-body"><p class="pw-bc-type">Housing Project</p><h4>Urban Square</h4><p class="pw-bc-loc"><i class="fa-solid fa-location-dot"></i> Sector 62, Noida</p><p class="pw-bc-price">₹42 – ₹50 Lakh</p><span class="pw-bc-link">View Price Details</span></div>
+                </div>
+                <div class="pw-bc" onclick="buyerApp && buyerApp.login()">
+                    <div class="pw-bc-img"><img src="https://images.unsplash.com/photo-1545324418-cc1a3fa10c00?w=400&q=80" alt=""></div>
+                    <div class="pw-bc-body"><p class="pw-bc-type">Apartment</p><h4>Skyline Residency</h4><p class="pw-bc-loc"><i class="fa-solid fa-location-dot"></i> Baner, Pune</p><p class="pw-bc-price">₹35 – ₹48 Lakh</p><span class="pw-bc-link">View Price Details</span></div>
+                </div>
+                <div class="pw-bc" onclick="buyerApp && buyerApp.login()">
+                    <div class="pw-bc-img"><img src="https://images.unsplash.com/photo-1570129477492-45c003edd2be?w=400&q=80" alt=""></div>
+                    <div class="pw-bc-body"><p class="pw-bc-type">Plot / Land</p><h4>Sunrise Plots</h4><p class="pw-bc-loc"><i class="fa-solid fa-location-dot"></i> Sarjapur, Bangalore</p><p class="pw-bc-price">₹30 – ₹45 Lakh</p><span class="pw-bc-link">View Price Details</span></div>
+                </div>
+                <div class="pw-bc pw-bc-viewall" onclick="buyerApp && buyerApp.login()">
+                    <i class="fa-solid fa-grid-2-plus"></i>
+                    <p>All Properties<br>Under ₹50 Lakh</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- TRENDING PROPERTIES -->
+    <section class="pw-section pw-section-gray">
+        <div class="pw-section-inner">
+            <div class="pw-section-head">
+                <h2 class="pw-section-title">Trending Properties</h2>
+            </div>
+            <div class="pw-trending-strip">
+                <div class="pw-trending-card" onclick="buyerApp && buyerApp.login()">
+                    <img src="https://images.unsplash.com/photo-1600585154340-be6161a56a0c?w=200&q=80" alt="">
+                    <p>Prestige Towers</p>
+                </div>
+                <div class="pw-trending-card" onclick="buyerApp && buyerApp.login()">
+                    <img src="https://images.unsplash.com/photo-1494526585095-c41746248156?w=200&q=80" alt="">
+                    <p>Godrej Aria</p>
+                </div>
+                <div class="pw-trending-card" onclick="buyerApp && buyerApp.login()">
+                    <img src="https://images.unsplash.com/photo-1600566753086-00f18fb6b3ea?w=200&q=80" alt="">
+                    <p>Lodha Palava</p>
+                </div>
+                <div class="pw-trending-card" onclick="buyerApp && buyerApp.login()">
+                    <img src="https://images.unsplash.com/photo-1583608205776-bfd35f0d9f83?w=200&q=80" alt="">
+                    <p>DLF Ultima</p>
+                </div>
+                <div class="pw-trending-card" onclick="buyerApp && buyerApp.login()">
+                    <img src="https://images.unsplash.com/photo-1568605114967-8130f3a36994?w=200&q=80" alt="">
+                    <p>Sobha Dream</p>
+                </div>
+                <div class="pw-trending-card" onclick="buyerApp && buyerApp.login()">
+                    <img src="https://images.unsplash.com/photo-1560185127-6a00b8c8e658?w=200&q=80" alt="">
+                    <p>Tata New Haven</p>
+                </div>
+                <div class="pw-trending-card pw-trending-explore" onclick="buyerApp && buyerApp.login()">
+                    <i class="fa-solid fa-building"></i>
+                    <p>Explore All</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- FILTER BY CHOICE -->
+    <section class="pw-section">
+        <div class="pw-section-inner">
+            <h2 class="pw-section-title">Find Properties of Your Choice</h2>
+            <div class="pw-filter-choice-grid">
+                <div class="pw-fcg-col">
+                    <h4>By Budget</h4>
+                    <div class="pw-fcg-links">
+                        <a onclick="buyerApp && buyerApp.login()">Under ₹25 Lakh</a>
+                        <a onclick="buyerApp && buyerApp.login()">Under ₹50 Lakh</a>
+                        <a onclick="buyerApp && buyerApp.login()">Under ₹1 Crore</a>
+                        <a onclick="buyerApp && buyerApp.login()">₹1 – ₹2 Crore</a>
+                        <a onclick="buyerApp && buyerApp.login()">₹2 Crore+</a>
+                    </div>
+                </div>
+                <div class="pw-fcg-col">
+                    <h4>By Type</h4>
+                    <div class="pw-fcg-links">
+                        <a onclick="buyerApp && buyerApp.login()">Apartment</a>
+                        <a onclick="buyerApp && buyerApp.login()">Villa</a>
+                        <a onclick="buyerApp && buyerApp.login()">Plot / Land</a>
+                        <a onclick="buyerApp && buyerApp.login()">Commercial</a>
+                        <a onclick="buyerApp && buyerApp.login()">Housing Project</a>
+                    </div>
+                </div>
+                <div class="pw-fcg-col">
+                    <h4>By BHK</h4>
+                    <div class="pw-fcg-links">
+                        <a onclick="buyerApp && buyerApp.login()">1 BHK Flats</a>
+                        <a onclick="buyerApp && buyerApp.login()">2 BHK Flats</a>
+                        <a onclick="buyerApp && buyerApp.login()">3 BHK Flats</a>
+                        <a onclick="buyerApp && buyerApp.login()">4+ BHK Flats</a>
+                        <a onclick="buyerApp && buyerApp.login()">Penthouse</a>
+                    </div>
+                </div>
+                <div class="pw-fcg-col">
+                    <h4>By Status</h4>
+                    <div class="pw-fcg-links">
+                        <a onclick="buyerApp && buyerApp.login()">Ready to Move</a>
+                        <a onclick="buyerApp && buyerApp.login()">Under Construction</a>
+                        <a onclick="buyerApp && buyerApp.login()">New Launch</a>
+                        <a onclick="buyerApp && buyerApp.login()">Resale</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- CITIES -->
+    <section class="pw-section pw-section-gray">
+        <div class="pw-section-inner">
+            <h2 class="pw-section-title">Properties by City</h2>
+            <div class="pw-city-grid">
+                <div class="pw-city-card" onclick="buyerApp && buyerApp.login()">
+                    <img src="https://images.unsplash.com/photo-1529253355930-ddbe423a2ac7?w=400&q=80" alt="Mumbai">
+                    <div class="pw-city-info"><h4>Mumbai</h4><p>2,400+ Properties</p><span>From ₹35 Lakh</span></div>
+                </div>
+                <div class="pw-city-card" onclick="buyerApp && buyerApp.login()">
+                    <img src="https://images.unsplash.com/photo-1587474260584-136574528ed5?w=400&q=80" alt="Delhi">
+                    <div class="pw-city-info"><h4>Delhi NCR</h4><p>3,100+ Properties</p><span>From ₹22 Lakh</span></div>
+                </div>
+                <div class="pw-city-card" onclick="buyerApp && buyerApp.login()">
+                    <img src="https://images.unsplash.com/photo-1596176530529-78163a4f7af2?w=400&q=80" alt="Bangalore">
+                    <div class="pw-city-info"><h4>Bangalore</h4><p>1,900+ Properties</p><span>From ₹28 Lakh</span></div>
+                </div>
+                <div class="pw-city-card" onclick="buyerApp && buyerApp.login()">
+                    <img src="https://images.unsplash.com/photo-1567157577867-05ccb1388e66?w=400&q=80" alt="Pune">
+                    <div class="pw-city-info"><h4>Pune</h4><p>1,200+ Properties</p><span>From ₹25 Lakh</span></div>
+                </div>
+                <div class="pw-city-card" onclick="buyerApp && buyerApp.login()">
+                    <img src="https://images.unsplash.com/photo-1616587226960-4a03badbe8bf?w=400&q=80" alt="Hyderabad">
+                    <div class="pw-city-info"><h4>Hyderabad</h4><p>980+ Properties</p><span>From ₹20 Lakh</span></div>
+                </div>
+                <div class="pw-city-card" onclick="buyerApp && buyerApp.login()">
+                    <img src="https://images.unsplash.com/photo-1582510003544-4d00b7f74220?w=400&q=80" alt="Chennai">
+                    <div class="pw-city-info"><h4>Chennai</h4><p>870+ Properties</p><span>From ₹18 Lakh</span></div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- TRUST STRIP -->
+    <section class="pw-trust">
+        <div class="pw-trust-inner">
+            <div class="pw-trust-item"><i class="fa-solid fa-shield-halved"></i><div><h4>100% Confidential</h4><p>Your details are never shared with sellers</p></div></div>
+            <div class="pw-trust-item"><i class="fa-solid fa-bolt"></i><div><h4>Fast Responses</h4><p>Notified the moment a developer replies</p></div></div>
+            <div class="pw-trust-item"><i class="fa-solid fa-building-circle-check"></i><div><h4>Verified Listings</h4><p>All properties posted by registered developers</p></div></div>
+            <div class="pw-trust-item"><i class="fa-solid fa-indian-rupee-sign"></i><div><h4>Zero Brokerage</h4><p>Connect directly with owners — no middlemen</p></div></div>
+        </div>
+    </section>
+
+    <!-- CTA -->
+    <section class="pw-cta">
+        <div class="pw-cta-inner">
+            <div><h2>Ready to find your dream property?</h2><p>Join thousands of buyers who found their home on PropWale</p></div>
+            <button onclick="buyerApp && buyerApp.login()" class="pw-cta-btn">
+                <img src="https://www.svgrepo.com/show/475656/google-color.svg" class="w-5 h-5 bg-white rounded-full p-0.5" alt="G"> Sign in with Google — It's Free
+            </button>
+        </div>
+    </section>
+
+</div><!-- /landing-page -->
+
+
+<!-- ═══════════════════════ MAIN APP ═══════════════════════ -->
+<main id="main-app" class="hidden pw-main-app">
+
+    <!-- DASHBOARD STATS BAR -->
+    <div class="pw-dash-bar">
+        <div class="pw-dash-inner">
+            <div class="pw-dash-welcome">
+                <div class="pw-dash-avatar" id="dash-avatar"></div>
+                <div>
+                    <p class="pw-dash-greeting">Welcome back,</p>
+                    <h2 class="pw-dash-name" id="buyer-welcome-name">Explorer</h2>
+                </div>
+            </div>
+            <div class="pw-dash-stats">
+                <div class="pw-stat-card">
+                    <p>Inquiries Sent</p>
+                    <h3 id="stat-sent">0</h3>
+                </div>
+                <div class="pw-stat-card pw-stat-green">
+                    <p>Developer Replies</p>
+                    <h3 id="stat-replies">0</h3>
+                </div>
+            </div>
         </div>
     </div>
 
+    <!-- TAB BAR -->
+    <div class="pw-tab-bar">
+        <div class="pw-tab-inner">
+            <button id="tab-home" class="pw-tab pw-tab-active" onclick="buyerApp.switchTab('home')">
+                <i class="fa-solid fa-compass"></i> Explore Properties
+            </button>
+            <button id="tab-interests" class="pw-tab" onclick="buyerApp.switchTab('interests')">
+                <i class="fa-regular fa-bell"></i> My Interests &amp; Updates
+                <span id="notif-badge" class="hidden pw-notif-badge">NEW</span>
+            </button>
+        </div>
+    </div>
+
+    <!-- SECTION: EXPLORE -->
+    <div id="section-home" class="pw-tab-section animate-fade-in-up">
+        <div class="pw-section-inner">
+
+            <!-- SEARCH BAR -->
+            <div class="pw-app-search">
+                <div class="pw-as-field pw-as-main">
+                    <i class="fa-solid fa-magnifying-glass"></i>
+                    <input type="text" id="search-keyword" placeholder="Area, location, developer or title…" />
+                </div>
+                <div class="pw-as-field pw-as-type">
+                    <select id="search-type">
+                        <option value="">All Types</option>
+                        <option value="Apartment">Apartment</option>
+                        <option value="Commercial">Commercial</option>
+                        <option value="Villa">Villa</option>
+                        <option value="Plot/Land">Plot / Land</option>
+                        <option value="Housing Project">Housing Project</option>
+                    </select>
+                </div>
+                <button onclick="buyerApp.fetchAndFilterListings()" class="pw-as-btn">
+                    <i class="fa-solid fa-magnifying-glass"></i> Search
+                </button>
+            </div>
+
+            <!-- RESULTS COUNT -->
+            <div id="results-header" class="pw-results-header"></div>
+
+            <!-- LISTING GRID -->
+            <div id="market-grid" class="pw-grid"></div>
+        </div>
+    </div>
+
+    <!-- SECTION: MY INTERESTS -->
+    <div id="section-interests" class="hidden pw-tab-section animate-fade-in-up">
+        <div class="pw-section-inner">
+            <h2 class="pw-interests-title">Updates from Sellers</h2>
+            <p class="pw-interests-sub">Track your inquiries and developer responses here.</p>
+            <div id="my-queries-list" class="pw-queries"></div>
+        </div>
+    </div>
+
+</main><!-- /main-app -->
+
+
+<!-- ═══════════════════════ QUERY MODAL ═══════════════════════ -->
+<div id="query-modal" class="pw-modal-bg hidden">
+    <div class="pw-modal">
+        <div class="pw-modal-head">
+            <div>
+                <h3>Express Interest</h3>
+                <p id="modal-listing-title" class="pw-modal-listing"></p>
+            </div>
+            <button onclick="document.getElementById('query-modal').classList.add('hidden')" class="pw-modal-x"><i class="fa-solid fa-xmark"></i></button>
+        </div>
+        <div class="pw-modal-confidential">
+            <i class="fa-solid fa-lock"></i>
+            <span>Your contact details are <strong>never shared</strong> with the seller. They will only see your message.</span>
+        </div>
+        <textarea id="query-text" rows="4" placeholder="e.g. Is the price negotiable? What is the floor plan availability? When is possession?"></textarea>
+        <div class="pw-modal-footer">
+            <button onclick="document.getElementById('query-modal').classList.add('hidden')" class="pw-modal-cancel">Cancel</button>
+            <button id="submit-query-btn" onclick="buyerApp.submitQuery()" class="pw-modal-send">
+                <i class="fa-solid fa-paper-plane"></i> Send Securely
+            </button>
+        </div>
+    </div>
+</div>
+
+
+<!-- ═══════════════════════ FOOTER ═══════════════════════ -->
+<footer class="pw-footer" id="pw-footer">
+    <div class="pw-footer-top">
+        <div class="pw-footer-brand">
+            <div class="pw-footer-logo">Prop<span>Wale</span></div>
+            <p>India's most trusted property marketplace. Find verified listings, connect directly with developers, and buy with confidence.</p>
+        </div>
+        <div class="pw-footer-col"><h5>Browse</h5><a href="#">New Properties</a><a href="#">Ready to Move</a><a href="#">Under Construction</a><a href="#">Commercial</a></div>
+        <div class="pw-footer-col"><h5>Cities</h5><a href="#">Mumbai</a><a href="#">Delhi NCR</a><a href="#">Bangalore</a><a href="#">Pune</a><a href="#">Hyderabad</a></div>
+        <div class="pw-footer-col"><h5>Company</h5><a href="#">About Us</a><a href="#">Careers</a><a href="#">Advertise</a><a href="#">Terms &amp; Privacy</a></div>
+    </div>
+    <div class="pw-footer-bottom">
+        <span>© 2025 PropWale · A PropMatch Technologies product</span>
+        <div><a href="../">Switch Portal</a> · <a href="../seller/">Seller Login</a></div>
+    </div>
+</footer>
+
+<script type="module" src="buyer.js"></script>
 </body>
 </html>
